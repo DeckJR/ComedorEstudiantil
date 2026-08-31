@@ -1,8 +1,16 @@
+using ComedorEstudiantil.Application.Services.Implementations;
+using ComedorEstudiantil.Application.Services.Interfaces;
 using ComedorEstudiantil.Infraestructure.Data;
+using ComedorEstudiantil.Infraestructure.Models;
+using ComedorEstudiantil.Infraestructure.Repository.Implementations;
+using ComedorEstudiantil.Infraestructure.Repository.Interfaces;
 using ComedorEstudiantil.Web.Middleware;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
+using ComedorEstudiantil.Web.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,10 +19,10 @@ var connectionString = builder.Configuration
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
-    throw new InvalidOperationException("No se encontró la cadena de conexión MariaDbConnection.");
+    throw new InvalidOperationException(
+        "No se encontró la cadena de conexión MariaDbConnection.");
 }
 
-// Configuración de Serilog
 builder.Host.UseSerilog((context, services, configuration) =>
 {
     configuration
@@ -37,8 +45,7 @@ builder.Host.UseSerilog((context, services, configuration) =>
             shared: true,
             outputTemplate:
                 "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} " +
-                "{Level:u3}] " +
-                "{Message:lj}" +
+                "{Level:u3}] {Message:lj}" +
                 "{NewLine}{Exception}")
         .WriteTo.Logger(errorLogger =>
         {
@@ -52,16 +59,17 @@ builder.Host.UseSerilog((context, services, configuration) =>
                     shared: true,
                     outputTemplate:
                         "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} " +
-                        "{Level:u3}] " +
-                        "{Message:lj}" +
+                        "{Level:u3}] {Message:lj}" +
                         "{NewLine}{Exception}");
         });
 });
 
-// Configuración de MariaDB
 builder.Services.AddDbContext<ComedorEstudiantilContext>(options =>
 {
-    options.UseMySql(connectionString,new MariaDbServerVersion(new Version(10, 4, 32)));
+    options.UseMySql(
+        connectionString,
+        new MariaDbServerVersion(
+            new Version(10, 4, 32)));
 
     if (builder.Environment.IsDevelopment())
     {
@@ -70,12 +78,140 @@ builder.Services.AddDbContext<ComedorEstudiantilContext>(options =>
     }
 });
 
-// Servicios MVC
+builder.Services.AddScoped<
+    IRepositoryUsuario,
+    RepositoryUsuario>();
+
+builder.Services.AddScoped<
+    IServiceAutenticacion,
+    ServiceAutenticacion>();
+
+builder.Services.AddScoped<
+    IPasswordHasher<Usuario>,
+    PasswordHasher<Usuario>>();
+
+builder.Services
+    .AddAuthentication(
+        CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Cuenta/IniciarSesion";
+        options.AccessDeniedPath = "/Cuenta/AccesoDenegado";
+        options.Cookie.Name = "ComedorEstudiantil.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy =
+            CookieSecurePolicy.Always;
+        options.Cookie.SameSite =
+            SameSiteMode.Lax;
+        options.ExpireTimeSpan =
+            TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+    });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(
+        PoliticasAutorizacion.UsuarioAutenticado,
+        policy =>
+        {
+            policy.RequireAuthenticatedUser();
+        });
+
+    options.AddPolicy(
+        PoliticasAutorizacion.RegistrarSolicitudAjena,
+        policy =>
+        {
+            policy.RequireRole(
+                "Cocina",
+                "Direccion",
+                "Director",
+                "Administrador");
+        });
+
+    options.AddPolicy(
+        PoliticasAutorizacion.RegistrarEntrega,
+        policy =>
+        {
+            policy.RequireRole(
+                "Cocina",
+                "Direccion",
+                "Director",
+                "Administrador");
+        });
+
+    options.AddPolicy(
+        PoliticasAutorizacion.GestionarMenus,
+        policy =>
+        {
+            policy.RequireRole(
+                "Cocina",
+                "Direccion",
+                "Director",
+                "Administrador");
+        });
+
+    options.AddPolicy(
+        PoliticasAutorizacion.GestionarActividades,
+        policy =>
+        {
+            policy.RequireRole(
+                "Cocina",
+                "Direccion",
+                "Director",
+                "Administrador");
+        });
+
+    options.AddPolicy(
+        PoliticasAutorizacion.GestionarUsuarios,
+        policy =>
+        {
+            policy.RequireRole(
+                "Direccion",
+                "Director",
+                "Administrador");
+        });
+
+    options.AddPolicy(
+        PoliticasAutorizacion.GestionarEstudiantes,
+        policy =>
+        {
+            policy.RequireRole(
+                "Auxiliar",
+                "Orientador",
+                "Direccion",
+                "Director",
+                "Administrador");
+        });
+
+    options.AddPolicy(
+        PoliticasAutorizacion.VerReportes,
+        policy =>
+        {
+            policy.RequireRole(
+                "Direccion",
+                "Director",
+                "Administrador");
+        });
+
+    options.AddPolicy(
+        PoliticasAutorizacion.ConsultarBitacora,
+        policy =>
+        {
+            policy.RequireRole(
+                "Director",
+                "Administrador");
+        });
+
+    options.AddPolicy(
+        PoliticasAutorizacion.ConfiguracionTecnica,
+        policy =>
+        {
+            policy.RequireRole("Administrador");
+        });
+});
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configuración del pipeline HTTP
 if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
@@ -83,14 +219,19 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Registra información resumida de cada solicitud HTTP.
 app.UseSerilogRequestLogging(options =>
 {
-    options.MessageTemplate = "Solicitud HTTP {RequestMethod} {RequestPath} " + "respondió {StatusCode} en {Elapsed:0.0000} ms";
+    options.MessageTemplate =
+        "Solicitud HTTP {RequestMethod} {RequestPath} " +
+        "respondió {StatusCode} en {Elapsed:0.0000} ms";
 
-    options.GetLevel = ( httpContext,elapsed,exception) =>
+    options.GetLevel = (
+        httpContext,
+        elapsed,
+        exception) =>
     {
-        if (exception is not null || httpContext.Response.StatusCode >= 500)
+        if (exception is not null ||
+            httpContext.Response.StatusCode >= 500)
         {
             return LogEventLevel.Error;
         }
@@ -104,15 +245,19 @@ app.UseSerilogRequestLogging(options =>
     };
 });
 
-// Captura excepciones de controladores, servicios y repositorios.
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
 
-app.MapControllerRoute(name: "default",pattern:"{controller=Home}/{action=Index}/{id?}").WithStaticAssets();
+app.MapControllerRoute(
+    name: "default",
+    pattern:
+        "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.Run();

@@ -1,0 +1,78 @@
+﻿@model ComedorEstudiantil.Application.DTOs.LoginDTO
+
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h4 mb-0">Iniciar sesión</h1>
+                </div>
+
+                <div class="card-body">
+                    <form asp-controller="Cuenta"
+                          asp-action="IniciarSesion"
+                          method="post">
+                        @Html.AntiForgeryToken()
+
+                        <input asp-for="ReturnUrl" type="hidden" />
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Identificacion"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Identificacion"
+                                   class="form-control"
+                                   autocomplete="username"
+                                   autofocus />
+
+                            <span asp-validation-for="Identificacion"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Contrasena"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Contrasena"
+                                   class="form-control"
+                                   autocomplete="current-password" />
+
+                            <span asp-validation-for="Contrasena"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="Recordarme"
+                                   class="form-check-input" />
+
+                            <label asp-for="Recordarme"
+                                   class="form-check-label">
+                            </label>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Ingresar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
