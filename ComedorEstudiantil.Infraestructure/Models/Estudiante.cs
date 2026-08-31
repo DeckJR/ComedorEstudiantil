@@ -17,7 +17,7 @@ public partial class Estudiante
 
     public short AnioIngreso { get; set; }
 
-    public ulong Activo { get; set; }
+    public bool? Activo { get; set; }
 
     public virtual Gradoseccion? IdGradoSeccionNavigation { get; set; }
 

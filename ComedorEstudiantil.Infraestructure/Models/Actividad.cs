@@ -13,7 +13,7 @@ public partial class Actividad
 
     public string? Descripcion { get; set; }
 
-    public ulong Activo { get; set; }
+    public bool? Activo { get; set; }
 
     public virtual ICollection<Menu> Menu { get; set; } = new List<Menu>();
 }

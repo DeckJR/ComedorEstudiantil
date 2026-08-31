@@ -11,7 +11,7 @@ public partial class Tipocomida
 
     public TimeOnly HoraLimiteMarcar { get; set; }
 
-    public ulong Activo { get; set; }
+    public bool? Activo { get; set; }
 
     public virtual ICollection<Menu> Menu { get; set; } = new List<Menu>();
 }

@@ -15,7 +15,7 @@ public partial class Menu
 
     public int? IdActividad { get; set; }
 
-    public ulong Publicado { get; set; }
+    public bool Publicado { get; set; }
 
     public int IdUsuarioCreador { get; set; }
 

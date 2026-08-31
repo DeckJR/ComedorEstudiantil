@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using ComedorEstudiantil.Models;
 using Microsoft.AspNetCore.Mvc;
+using ComedorEstudiantil.Web.Models;
 
 namespace ComedorEstudiantil.Controllers
 {
@@ -28,5 +29,19 @@ namespace ComedorEstudiantil.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        [HttpGet]
+        public IActionResult ErrorHandler(string? idEvento)
+        {
+            var modelo = new ErrorMiddlewareViewModel
+            {
+                IdEvento = string.IsNullOrWhiteSpace(idEvento)
+                    ? "No disponible"
+                    : idEvento
+            };
+
+            return View(modelo);
+        }
+
     }
 }

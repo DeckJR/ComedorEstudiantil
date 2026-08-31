@@ -19,7 +19,7 @@ public partial class Usuario
 
     public int IdRol { get; set; }
 
-    public ulong Activo { get; set; }
+    public bool? Activo { get; set; }
 
     public DateTime FechaCreacion { get; set; }
 

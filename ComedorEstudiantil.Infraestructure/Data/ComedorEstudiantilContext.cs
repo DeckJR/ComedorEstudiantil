@@ -52,8 +52,8 @@ public partial class ComedorEstudiantilContext : DbContext
 
             entity.Property(e => e.IdActividad).HasColumnType("int(11)");
             entity.Property(e => e.Activo)
-                .HasDefaultValueSql("b'1'")
-                .HasColumnType("bit(1)");
+                .IsRequired()
+                .HasDefaultValueSql("'1'");
             entity.Property(e => e.Descripcion).HasMaxLength(255);
             entity.Property(e => e.Nombre).HasMaxLength(150);
         });
@@ -101,7 +101,7 @@ public partial class ComedorEstudiantilContext : DbContext
             entity.Property(e => e.IdSolicitud).HasColumnType("int(11)");
             entity.Property(e => e.IdUsuarioEntrego).HasColumnType("int(11)");
             entity.Property(e => e.MetodoEntrega)
-                .HasDefaultValueSql("'3'")
+                .HasDefaultValueSql("'2'")
                 .HasColumnType("tinyint(4)");
 
             entity.HasOne(d => d.IdSolicitudNavigation).WithOne(p => p.Entrega)
@@ -131,8 +131,8 @@ public partial class ComedorEstudiantilContext : DbContext
 
             entity.Property(e => e.IdEstudiante).HasColumnType("int(11)");
             entity.Property(e => e.Activo)
-                .HasDefaultValueSql("b'1'")
-                .HasColumnType("bit(1)");
+                .IsRequired()
+                .HasDefaultValueSql("'1'");
             entity.Property(e => e.AnioIngreso).HasColumnType("year(4)");
             entity.Property(e => e.CodigoAcceso).HasMaxLength(50);
             entity.Property(e => e.IdGradoSeccion).HasColumnType("int(11)");
@@ -191,9 +191,6 @@ public partial class ComedorEstudiantilContext : DbContext
             entity.Property(e => e.IdActividad).HasColumnType("int(11)");
             entity.Property(e => e.IdTipoComida).HasColumnType("int(11)");
             entity.Property(e => e.IdUsuarioCreador).HasColumnType("int(11)");
-            entity.Property(e => e.Publicado)
-                .HasDefaultValueSql("b'0'")
-                .HasColumnType("bit(1)");
 
             entity.HasOne(d => d.IdActividadNavigation).WithMany(p => p.Menu)
                 .HasForeignKey(d => d.IdActividad)
@@ -283,8 +280,8 @@ public partial class ComedorEstudiantilContext : DbContext
 
             entity.Property(e => e.IdTipoComida).HasColumnType("int(11)");
             entity.Property(e => e.Activo)
-                .HasDefaultValueSql("b'1'")
-                .HasColumnType("bit(1)");
+                .IsRequired()
+                .HasDefaultValueSql("'1'");
             entity.Property(e => e.HoraLimiteMarcar).HasColumnType("time");
             entity.Property(e => e.Nombre).HasMaxLength(30);
         });
@@ -303,8 +300,8 @@ public partial class ComedorEstudiantilContext : DbContext
 
             entity.Property(e => e.IdUsuario).HasColumnType("int(11)");
             entity.Property(e => e.Activo)
-                .HasDefaultValueSql("b'1'")
-                .HasColumnType("bit(1)");
+                .IsRequired()
+                .HasDefaultValueSql("'1'");
             entity.Property(e => e.Apellidos).HasMaxLength(100);
             entity.Property(e => e.ContrasenaHash).HasMaxLength(255);
             entity.Property(e => e.Correo).HasMaxLength(150);
@@ -335,7 +332,7 @@ public partial class ComedorEstudiantilContext : DbContext
                 .HasDefaultValueSql("current_timestamp()")
                 .HasColumnType("datetime");
             entity.Property(e => e.MetodoEntrega)
-                .HasDefaultValueSql("'3'")
+                .HasDefaultValueSql("'2'")
                 .HasColumnType("tinyint(4)");
             entity.Property(e => e.NombreCompleto)
                 .HasMaxLength(201)

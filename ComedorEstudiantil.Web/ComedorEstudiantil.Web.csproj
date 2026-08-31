@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.2.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ComedorEstudiantil.Application\ComedorEstudiantil.Application.csproj" />
     <ProjectReference Include="..\ComedorEstudiantil.Infraestructure\ComedorEstudiantil.Infraestructure.csproj" />
   </ItemGroup>
