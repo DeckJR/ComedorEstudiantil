@@ -1,9 +1,9 @@
-﻿using ComedorEstudiantil.Application.DTOs;
+﻿using System.Security.Claims;
+using ComedorEstudiantil.Application.DTOs;
 using ComedorEstudiantil.Application.Services.Interfaces;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ComedorEstudiantil.Web.Controllers
@@ -11,17 +11,23 @@ namespace ComedorEstudiantil.Web.Controllers
     public class CuentaController : Controller
     {
         private readonly IServiceAutenticacion _serviceAutenticacion;
+        private readonly IServiceBitacora _serviceBitacora;
         private readonly ILogger<CuentaController> _logger;
 
-        public CuentaController(IServiceAutenticacion serviceAutenticacion,ILogger<CuentaController> logger)
+        public CuentaController(
+            IServiceAutenticacion serviceAutenticacion,
+            IServiceBitacora serviceBitacora,
+            ILogger<CuentaController> logger)
         {
             _serviceAutenticacion = serviceAutenticacion;
+            _serviceBitacora = serviceBitacora;
             _logger = logger;
         }
 
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult IniciarSesion(string? returnUrl = null)
+        public IActionResult IniciarSesion(
+            string? returnUrl = null)
         {
             if (User.Identity?.IsAuthenticated == true)
             {
@@ -39,20 +45,34 @@ namespace ComedorEstudiantil.Web.Controllers
         [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> IniciarSesion(LoginDTO login)
+        public async Task<IActionResult> IniciarSesion(
+            LoginDTO login)
         {
             if (!ModelState.IsValid)
             {
                 return View(login);
             }
 
-            UsuarioSesionDTO? usuario = await _serviceAutenticacion.AutenticarAsync(login);
+            UsuarioSesionDTO? usuario =
+                await _serviceAutenticacion.AutenticarAsync(
+                    login);
 
             if (usuario is null)
             {
-                _logger.LogWarning("Intento de inicio de sesión fallido para la identificación {Identificacion}.",login.Identificacion);
+                _logger.LogWarning(
+                    "Intento de inicio de sesión fallido para la identificación {Identificacion}.",
+                    login.Identificacion);
 
-                ModelState.AddModelError(string.Empty,"La identificación o la contraseña son incorrectas.");
+                await RegistrarBitacoraSeguroAsync(
+                    null,
+                    "InicioSesionFallido",
+                    "Cuenta",
+                    null,
+                    $"Intento fallido para la identificación {login.Identificacion}.");
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "La identificación o la contraseña son incorrectas.");
 
                 return View(login);
             }
@@ -79,29 +99,45 @@ namespace ComedorEstudiantil.Web.Controllers
                     usuario.DebeCambiarContrasena.ToString())
             };
 
-            var identidad = new ClaimsIdentity(claims,CookieAuthenticationDefaults.AuthenticationScheme);
+            var identidad = new ClaimsIdentity(
+                claims,
+                CookieAuthenticationDefaults
+                    .AuthenticationScheme);
 
-            var principal = new ClaimsPrincipal(identidad);
+            var principal =
+                new ClaimsPrincipal(identidad);
 
-            var propiedades = new AuthenticationProperties
-            {
-                IsPersistent = login.Recordarme,
-                AllowRefresh = true
-            };
+            var propiedades =
+                new AuthenticationProperties
+                {
+                    IsPersistent =
+                        login.Recordarme,
+                    AllowRefresh = true
+                };
 
             if (login.Recordarme)
             {
-                propiedades.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7);
+                propiedades.ExpiresUtc =
+                    DateTimeOffset.UtcNow.AddDays(7);
             }
 
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
+                CookieAuthenticationDefaults
+                    .AuthenticationScheme,
                 principal,
                 propiedades);
 
             _logger.LogInformation(
                 "El usuario {IdUsuario} inició sesión correctamente.",
                 usuario.IdUsuario);
+
+            await RegistrarBitacoraSeguroAsync(
+                usuario.IdUsuario,
+                "InicioSesion",
+                "Cuenta",
+                usuario.IdUsuario,
+                "Inicio de sesión correcto.");
+
             if (usuario.DebeCambiarContrasena)
             {
                 return RedirectToAction(
@@ -109,22 +145,29 @@ namespace ComedorEstudiantil.Web.Controllers
                     "Cuenta");
             }
 
-            if (!string.IsNullOrWhiteSpace(login.ReturnUrl) &&
+            if (!string.IsNullOrWhiteSpace(
+                    login.ReturnUrl) &&
                 Url.IsLocalUrl(login.ReturnUrl))
             {
-                return LocalRedirect(login.ReturnUrl);
+                return LocalRedirect(
+                    login.ReturnUrl);
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction(
+                "Index",
+                "Home");
         }
+
         [Authorize]
         [HttpGet]
         public IActionResult CambiarContrasena()
         {
-            var formulario = new CambiarContrasenaDTO
-            {
-                CambioObligatorio = DebeCambiarContrasena()
-            };
+            var formulario =
+                new CambiarContrasenaDTO
+                {
+                    CambioObligatorio =
+                        DebeCambiarContrasena()
+                };
 
             return View(formulario);
         }
@@ -143,10 +186,14 @@ namespace ComedorEstudiantil.Web.Controllers
                 return View(formulario);
             }
 
+            int idUsuario =
+                ObtenerIdUsuarioActual();
+
             ResultadoOperacionDTO resultado =
-                await _serviceAutenticacion.CambiarContrasenaAsync(
-                    ObtenerIdUsuarioActual(),
-                    formulario);
+                await _serviceAutenticacion
+                    .CambiarContrasenaAsync(
+                        idUsuario,
+                        formulario);
 
             if (!resultado.Exitoso)
             {
@@ -159,51 +206,44 @@ namespace ComedorEstudiantil.Web.Controllers
 
             _logger.LogInformation(
                 "El usuario {IdUsuario} cambió su contraseña.",
-                ObtenerIdUsuarioActual());
+                idUsuario);
+
+            await RegistrarBitacoraSeguroAsync(
+                idUsuario,
+                "CambioContrasena",
+                "Cuenta",
+                idUsuario,
+                "El usuario cambió su contraseña.");
 
             await HttpContext.SignOutAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme);
+                CookieAuthenticationDefaults
+                    .AuthenticationScheme);
 
             TempData["MensajeExito"] =
                 "La contraseña fue actualizada. Inicie sesión nuevamente.";
 
-            return RedirectToAction(nameof(IniciarSesion));
+            return RedirectToAction(
+                nameof(IniciarSesion));
         }
 
-        private int ObtenerIdUsuarioActual()
-        {
-            string? valor = User.FindFirstValue(
-                ClaimTypes.NameIdentifier);
-
-            if (!int.TryParse(valor, out int idUsuario))
-            {
-                throw new InvalidOperationException(
-                    "No fue posible identificar al usuario autenticado.");
-            }
-
-            return idUsuario;
-        }
-
-        private bool DebeCambiarContrasena()
-        {
-            string? valor = User.FindFirstValue(
-                "DebeCambiarContrasena");
-
-            return string.Equals(
-                valor,
-                bool.TrueString,
-                StringComparison.OrdinalIgnoreCase);
-        }
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CerrarSesion()
         {
-            string? idUsuario = User.FindFirstValue(
-                ClaimTypes.NameIdentifier);
+            int idUsuario =
+                ObtenerIdUsuarioActual();
+
+            await RegistrarBitacoraSeguroAsync(
+                idUsuario,
+                "CierreSesion",
+                "Cuenta",
+                idUsuario,
+                "El usuario cerró su sesión.");
 
             await HttpContext.SignOutAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme);
+                CookieAuthenticationDefaults
+                    .AuthenticationScheme);
 
             _logger.LogInformation(
                 "El usuario {IdUsuario} cerró sesión.",
@@ -219,6 +259,63 @@ namespace ComedorEstudiantil.Web.Controllers
         public IActionResult AccesoDenegado()
         {
             return View();
+        }
+
+        private int ObtenerIdUsuarioActual()
+        {
+            string? valor =
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(
+                valor,
+                out int idUsuario))
+            {
+                throw new InvalidOperationException(
+                    "No fue posible identificar al usuario autenticado.");
+            }
+
+            return idUsuario;
+        }
+
+        private bool DebeCambiarContrasena()
+        {
+            string? valor =
+                User.FindFirstValue(
+                    "DebeCambiarContrasena");
+
+            return string.Equals(
+                valor,
+                bool.TrueString,
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        private async Task RegistrarBitacoraSeguroAsync(
+            int? idUsuario,
+            string accion,
+            string entidad,
+            int? idEntidad,
+            string detalle)
+        {
+            try
+            {
+                await _serviceBitacora.RegistrarAsync(
+                    idUsuario,
+                    accion,
+                    entidad,
+                    idEntidad,
+                    detalle,
+                    HttpContext.Connection
+                        .RemoteIpAddress?
+                        .ToString());
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(
+                    exception,
+                    "No fue posible registrar la acción {Accion} en la bitácora.",
+                    accion);
+            }
         }
     }
 }

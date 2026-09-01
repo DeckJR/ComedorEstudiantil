@@ -13,15 +13,21 @@ namespace ComedorEstudiantil.Web.Controllers
         private readonly IServiceReporte _serviceReporte;
         private readonly IReportePdfService _reportePdfService;
         private readonly IFechaHoraService _fechaHoraService;
+        private readonly IServiceBitacora _serviceBitacora;
+        private readonly ILogger<ReporteController> _logger;
 
         public ReporteController(
             IServiceReporte serviceReporte,
             IReportePdfService reportePdfService,
-            IFechaHoraService fechaHoraService)
+            IFechaHoraService fechaHoraService,
+            IServiceBitacora serviceBitacora,
+            ILogger<ReporteController> logger)
         {
             _serviceReporte = serviceReporte;
             _reportePdfService = reportePdfService;
             _fechaHoraService = fechaHoraService;
+            _serviceBitacora = serviceBitacora;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -59,6 +65,10 @@ namespace ComedorEstudiantil.Web.Controllers
             string nombre =
                 $"solicitudes-{filtro.FechaInicio:yyyyMMdd}-{filtro.FechaFin:yyyyMMdd}.pdf";
 
+            await RegistrarDescargaAsync(
+    "DescargaReporteSolicitudesPdf",
+    filtro);
+
             return File(
                 archivo,
                 "application/pdf",
@@ -78,10 +88,52 @@ namespace ComedorEstudiantil.Web.Controllers
             string nombre =
                 $"entregas-{filtro.FechaInicio:yyyyMMdd}-{filtro.FechaFin:yyyyMMdd}.pdf";
 
+            await RegistrarDescargaAsync(
+    "DescargaReporteSolicitudesPdf",
+    filtro);
+
             return File(
                 archivo,
                 "application/pdf",
                 nombre);
+        }
+        private async Task RegistrarDescargaAsync(
+    string accion,
+    FiltroReporteDTO filtro)
+        {
+            try
+            {
+                int? idUsuario = null;
+
+                string? valor =
+                    User.FindFirst(
+                        System.Security.Claims.ClaimTypes
+                            .NameIdentifier)?
+                        .Value;
+
+                if (int.TryParse(
+                    valor,
+                    out int idConvertido))
+                {
+                    idUsuario = idConvertido;
+                }
+
+                await _serviceBitacora.RegistrarAsync(
+                    idUsuario,
+                    accion,
+                    "Reporte",
+                    null,
+                    $"Periodo consultado: {filtro.FechaInicio:dd/MM/yyyy} al {filtro.FechaFin:dd/MM/yyyy}.",
+                    HttpContext.Connection
+                        .RemoteIpAddress?
+                        .ToString());
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(
+                    exception,
+                    "No fue posible registrar la descarga del reporte.");
+            }
         }
     }
 }

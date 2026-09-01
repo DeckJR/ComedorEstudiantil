@@ -12,6 +12,7 @@ using Serilog;
 using Serilog.Events;
 using ComedorEstudiantil.Web.Authorization;
 using ComedorEstudiantil.Web.Services;
+using ComedorEstudiantil.Web.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -95,7 +96,9 @@ builder.Services.AddScoped<IRepositoryMenu, RepositoryMenu>();
 builder.Services.AddScoped<IRepositorySolicitud, RepositorySolicitud>();
 builder.Services.AddScoped<IRepositoryEntrega, RepositoryEntrega>();
 builder.Services.AddScoped<IRepositoryReporte, RepositoryReporte>();
+builder.Services.AddScoped<IRepositoryBitacora, RepositoryBitacora>();
 
+builder.Services.AddScoped<IServiceBitacora, ServiceBitacora>();
 builder.Services.AddScoped<IServiceReporte, ServiceReporte>();
 builder.Services.AddScoped<IServiceEntrega, ServiceEntrega>();
 builder.Services.AddScoped<IServiceSolicitud, ServiceSolicitud>();
@@ -104,6 +107,9 @@ builder.Services.AddScoped<IServiceActividad, ServiceActividad>();
 builder.Services.AddScoped<IServiceUsuario, ServiceUsuario>();
 builder.Services.AddScoped<IServiceAutenticacion,ServiceAutenticacion>();
 builder.Services.AddScoped<IPasswordHasher<Usuario>,PasswordHasher<Usuario>>();
+
+
+builder.Services.AddScoped<AuditoriaActionFilter>();
 
 builder.Services
     .AddAuthentication(
@@ -223,7 +229,10 @@ builder.Services.AddAuthorization(options =>
             policy.RequireRole("Administrador");
         });
 });
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.AddService<AuditoriaActionFilter>();
+});
 
 var app = builder.Build();
 
