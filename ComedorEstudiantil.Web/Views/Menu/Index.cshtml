@@ -1,0 +1,77 @@
+﻿@model ComedorEstudiantil.Application.DTOs.MenuPublicoDTO
+
+@{
+    ViewData["Title"] = "Menú";
+}
+
+<div class="container py-4">
+    <div class="text-center mb-4">
+        <h1 class="h3">Menú del comedor</h1>
+        <p class="text-muted">
+            Consulte los alimentos disponibles para cada fecha.
+        </p>
+    </div>
+
+    <form asp-controller="Menu"
+          asp-action="Index"
+          method="get"
+          class="row justify-content-center mb-4">
+        <div class="col-md-5">
+            <label for="fecha"
+                   class="form-label">
+                Fecha
+            </label>
+
+            <div class="input-group">
+                <input id="fecha"
+                       name="fecha"
+                       type="date"
+                       class="form-control"
+                       value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Consultar
+                </button>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.Menus.Any())
+    {
+        <div class="row g-4">
+            @foreach (var menu in Model.Menus)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="h5 mb-0">@menu.TipoComida</h2>
+                        </div>
+
+                        <div class="card-body">
+                            <p style="white-space: pre-line;">@menu.Descripcion</p>
+
+                            @if (!string.IsNullOrWhiteSpace(menu.Actividad))
+                            {
+                                <div class="alert alert-info py-2">
+                                    Actividad: @menu.Actividad
+                                </div>
+                            }
+
+                            <div class="text-muted small">
+                                Hora límite para marcar:
+                                @menu.HoraLimiteMarcar.ToString("HH:mm")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            No existen menús publicados para la fecha seleccionada.
+        </div>
+    }
+</div>

@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 using ComedorEstudiantil.Web.Authorization;
+using ComedorEstudiantil.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,7 +84,10 @@ builder.Services.AddScoped<IRepositoryRol, RepositoryRol>();
 builder.Services.AddScoped<IRepositoryGradoSeccion, RepositoryGradoSeccion>();
 builder.Services.AddScoped<IRepositoryTipoBeneficiario, RepositoryTipoBeneficiario>();
 builder.Services.AddScoped<IRepositoryActividad, RepositoryActividad>();
+builder.Services.AddScoped<IRepositoryTipoComida, RepositoryTipoComida>();
+builder.Services.AddScoped<IRepositoryMenu, RepositoryMenu>();
 
+builder.Services.AddScoped<IServiceMenu, ServiceMenu>();
 builder.Services.AddScoped<IServiceActividad, ServiceActividad>();
 builder.Services.AddScoped<IServiceUsuario, ServiceUsuario>();
 builder.Services.AddScoped<IServiceAutenticacion,ServiceAutenticacion>();

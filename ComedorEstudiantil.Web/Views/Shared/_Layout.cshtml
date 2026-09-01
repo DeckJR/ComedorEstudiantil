@@ -23,6 +23,26 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark"
+                               asp-controller="Menu"
+                               asp-action="Index">
+                                Menú
+                            </a>
+                        </li>
+                        @if (User.IsInRole("Cocina") ||
+                        User.IsInRole("Direccion") ||
+                        User.IsInRole("Director") ||
+                        User.IsInRole("Administrador"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Menu"
+                                   asp-action="Administrar">
+                                    Administrar menús
+                                </a>
+                            </li>
+                        }
                         @if (User.IsInRole("Cocina") ||
                         User.IsInRole("Direccion") ||
                         User.IsInRole("Director") ||
