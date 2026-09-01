@@ -82,11 +82,11 @@ builder.Services.AddScoped<IRepositoryUsuario,RepositoryUsuario>();
 builder.Services.AddScoped<IRepositoryRol, RepositoryRol>();
 builder.Services.AddScoped<IRepositoryGradoSeccion, RepositoryGradoSeccion>();
 builder.Services.AddScoped<IRepositoryTipoBeneficiario, RepositoryTipoBeneficiario>();
+builder.Services.AddScoped<IRepositoryActividad, RepositoryActividad>();
 
+builder.Services.AddScoped<IServiceActividad, ServiceActividad>();
 builder.Services.AddScoped<IServiceUsuario, ServiceUsuario>();
-
 builder.Services.AddScoped<IServiceAutenticacion,ServiceAutenticacion>();
-
 builder.Services.AddScoped<IPasswordHasher<Usuario>,PasswordHasher<Usuario>>();
 
 builder.Services

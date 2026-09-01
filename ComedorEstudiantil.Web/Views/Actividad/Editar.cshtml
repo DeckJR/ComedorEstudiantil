@@ -1,0 +1,45 @@
+﻿@model ComedorEstudiantil.Application.DTOs.ActividadDTO
+
+@{
+    ViewData["Title"] = "Editar actividad";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="h4 mb-0">Editar actividad</h1>
+                </div>
+
+                <div class="card-body">
+                    <form asp-controller="Actividad"
+                          asp-action="Editar"
+                          method="post">
+                        @Html.AntiForgeryToken()
+
+                        <partial name="~/Views/Actividad/_Formulario.cshtml"
+                                 model="@Model" />
+
+                        <div class="d-flex gap-2">
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Guardar cambios
+                            </button>
+
+                            <a asp-controller="Actividad"
+                               asp-action="Index"
+                               class="btn btn-secondary">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
