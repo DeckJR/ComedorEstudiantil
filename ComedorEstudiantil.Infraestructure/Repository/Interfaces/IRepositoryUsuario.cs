@@ -9,11 +9,16 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Interfaces
 {
     public interface IRepositoryUsuario
     {
+        Task<List<Usuario>> ListarAsync();
         Task<Usuario?> BuscarPorIdentificacionAsync(string identificacion);
         Task<Usuario?> BuscarPorIdAsync(int idUsuario);
-        Task<bool> ExisteIdentificacionAsync(string identificacion);
-        Task<bool> ExisteCorreoAsync(string correo);
+        Task<Usuario?> BuscarPorIdParaEdicionAsync(int idUsuario);
+        Task<bool> ExisteIdentificacionAsync(string identificacion,int? idUsuarioExcluir = null);
+        Task<bool> ExisteCorreoAsync(string correo,int? idUsuarioExcluir = null);
         Task AgregarAsync(Usuario usuario);
-        Task ActualizarAsync(Usuario usuario);
+        Task GuardarCambiosAsync();
+        Task ActualizarHashContrasenaAsync(int idUsuario,string contrasenaHash);
+        Task EstablecerContrasenaAsync(int idUsuario,string contrasenaHash,bool debeCambiarContrasena,DateTime fechaCambio);
+        void EliminarEstudiante(Estudiante estudiante);
     }
 }

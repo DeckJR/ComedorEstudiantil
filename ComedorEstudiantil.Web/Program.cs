@@ -78,17 +78,16 @@ builder.Services.AddDbContext<ComedorEstudiantilContext>(options =>
     }
 });
 
-builder.Services.AddScoped<
-    IRepositoryUsuario,
-    RepositoryUsuario>();
+builder.Services.AddScoped<IRepositoryUsuario,RepositoryUsuario>();
+builder.Services.AddScoped<IRepositoryRol, RepositoryRol>();
+builder.Services.AddScoped<IRepositoryGradoSeccion, RepositoryGradoSeccion>();
+builder.Services.AddScoped<IRepositoryTipoBeneficiario, RepositoryTipoBeneficiario>();
 
-builder.Services.AddScoped<
-    IServiceAutenticacion,
-    ServiceAutenticacion>();
+builder.Services.AddScoped<IServiceUsuario, ServiceUsuario>();
 
-builder.Services.AddScoped<
-    IPasswordHasher<Usuario>,
-    PasswordHasher<Usuario>>();
+builder.Services.AddScoped<IServiceAutenticacion,ServiceAutenticacion>();
+
+builder.Services.AddScoped<IPasswordHasher<Usuario>,PasswordHasher<Usuario>>();
 
 builder.Services
     .AddAuthentication(
@@ -250,6 +249,7 @@ app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseRouting();
 
 app.UseAuthentication();
+app.UseMiddleware<CambioContrasenaMiddleware>();
 app.UseAuthorization();
 
 app.MapStaticAssets();

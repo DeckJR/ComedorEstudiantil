@@ -308,6 +308,7 @@ public partial class ComedorEstudiantilContext : DbContext
             entity.Property(e => e.FechaCreacion)
                 .HasDefaultValueSql("current_timestamp()")
                 .HasColumnType("datetime");
+            entity.Property(e => e.FechaUltimoCambioContrasena).HasColumnType("datetime");
             entity.Property(e => e.IdRol).HasColumnType("int(11)");
             entity.Property(e => e.Identificacion).HasMaxLength(20);
             entity.Property(e => e.Nombre).HasMaxLength(100);

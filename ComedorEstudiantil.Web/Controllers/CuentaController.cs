@@ -73,7 +73,10 @@ namespace ComedorEstudiantil.Web.Controllers
                     usuario.Rol),
                 new Claim(
                     "Identificacion",
-                    usuario.Identificacion)
+                    usuario.Identificacion),
+                new Claim(
+                    "DebeCambiarContrasena",
+                    usuario.DebeCambiarContrasena.ToString())
             };
 
             var identidad = new ClaimsIdentity(claims,CookieAuthenticationDefaults.AuthenticationScheme);
@@ -99,6 +102,12 @@ namespace ComedorEstudiantil.Web.Controllers
             _logger.LogInformation(
                 "El usuario {IdUsuario} inició sesión correctamente.",
                 usuario.IdUsuario);
+            if (usuario.DebeCambiarContrasena)
+            {
+                return RedirectToAction(
+                    nameof(CambiarContrasena),
+                    "Cuenta");
+            }
 
             if (!string.IsNullOrWhiteSpace(login.ReturnUrl) &&
                 Url.IsLocalUrl(login.ReturnUrl))
@@ -108,7 +117,83 @@ namespace ComedorEstudiantil.Web.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+        [Authorize]
+        [HttpGet]
+        public IActionResult CambiarContrasena()
+        {
+            var formulario = new CambiarContrasenaDTO
+            {
+                CambioObligatorio = DebeCambiarContrasena()
+            };
 
+            return View(formulario);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarContrasena(
+            CambiarContrasenaDTO formulario)
+        {
+            formulario.CambioObligatorio =
+                DebeCambiarContrasena();
+
+            if (!ModelState.IsValid)
+            {
+                return View(formulario);
+            }
+
+            ResultadoOperacionDTO resultado =
+                await _serviceAutenticacion.CambiarContrasenaAsync(
+                    ObtenerIdUsuarioActual(),
+                    formulario);
+
+            if (!resultado.Exitoso)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    resultado.Mensaje);
+
+                return View(formulario);
+            }
+
+            _logger.LogInformation(
+                "El usuario {IdUsuario} cambió su contraseña.",
+                ObtenerIdUsuarioActual());
+
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme);
+
+            TempData["MensajeExito"] =
+                "La contraseña fue actualizada. Inicie sesión nuevamente.";
+
+            return RedirectToAction(nameof(IniciarSesion));
+        }
+
+        private int ObtenerIdUsuarioActual()
+        {
+            string? valor = User.FindFirstValue(
+                ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(valor, out int idUsuario))
+            {
+                throw new InvalidOperationException(
+                    "No fue posible identificar al usuario autenticado.");
+            }
+
+            return idUsuario;
+        }
+
+        private bool DebeCambiarContrasena()
+        {
+            string? valor = User.FindFirstValue(
+                "DebeCambiarContrasena");
+
+            return string.Equals(
+                valor,
+                bool.TrueString,
+                StringComparison.OrdinalIgnoreCase);
+        }
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]

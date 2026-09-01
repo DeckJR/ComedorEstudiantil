@@ -1,0 +1,45 @@
+﻿@model ComedorEstudiantil.Application.DTOs.UsuarioFormularioDTO
+
+@{
+    ViewData["Title"] = "Editar usuario";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="h4 mb-0">Editar usuario</h1>
+                </div>
+
+                <div class="card-body">
+                    <form asp-controller="Usuario"
+                          asp-action="Editar"
+                          method="post">
+                        @Html.AntiForgeryToken()
+
+                        <partial name="~/Views/Usuario/_Formulario.cshtml"
+                                 model="@Model" />
+
+                        <div class="d-flex gap-2">
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Guardar cambios
+                            </button>
+
+                            <a asp-controller="Usuario"
+                               asp-action="Index"
+                               class="btn btn-secondary">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

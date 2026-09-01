@@ -10,5 +10,7 @@ namespace ComedorEstudiantil.Application.Services.Interfaces
     public interface IServiceAutenticacion
     {
         Task<UsuarioSesionDTO?> AutenticarAsync(LoginDTO login);
+
+        Task<ResultadoOperacionDTO> CambiarContrasenaAsync(int idUsuario,CambiarContrasenaDTO formulario);
     }
 }

@@ -23,6 +23,50 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+                        @if (User.IsInRole("Direccion") ||
+                        User.IsInRole("Director") ||
+                        User.IsInRole("Administrador"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Usuario"
+                                   asp-action="Index">
+                                    Usuarios
+                                </a>
+                            </li>
+                        }
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link text-dark">
+                                    @User.Identity.Name
+                                </span>
+                            </li>
+
+                            <li class="nav-item">
+                                <form asp-controller="Cuenta"
+                                      asp-action="CerrarSesion"
+                                      method="post"
+                                      class="d-inline">
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="nav-link btn btn-link text-dark">
+                                        Cerrar sesión
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Cuenta"
+                                   asp-action="IniciarSesion">
+                                    Iniciar sesión
+                                </a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>

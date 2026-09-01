@@ -23,6 +23,10 @@ public partial class Usuario
 
     public DateTime FechaCreacion { get; set; }
 
+    public bool DebeCambiarContrasena { get; set; }
+
+    public DateTime? FechaUltimoCambioContrasena { get; set; }
+
     public virtual ICollection<Bitacora> Bitacora { get; set; } = new List<Bitacora>();
 
     public virtual ICollection<Entrega> Entrega { get; set; } = new List<Entrega>();
