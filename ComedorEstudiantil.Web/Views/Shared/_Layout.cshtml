@@ -43,6 +43,16 @@
                                 </a>
                             </li>
                         }
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Solicitud"
+                                   asp-action="MisSolicitudes">
+                                    Mis solicitudes
+                                </a>
+                            </li>
+                        }
                         @if (User.IsInRole("Cocina") ||
                         User.IsInRole("Direccion") ||
                         User.IsInRole("Director") ||

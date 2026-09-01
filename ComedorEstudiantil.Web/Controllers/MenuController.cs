@@ -11,12 +11,12 @@ namespace ComedorEstudiantil.Web.Controllers
     {
         private readonly IServiceMenu _serviceMenu;
         private readonly ILogger<MenuController> _logger;
+        private readonly IServiceSolicitud _serviceSolicitud;
 
-        public MenuController(
-            IServiceMenu serviceMenu,
-            ILogger<MenuController> logger)
+        public MenuController(IServiceMenu serviceMenu, IServiceSolicitud serviceSolicitud, ILogger<MenuController> logger)
         {
             _serviceMenu = serviceMenu;
+            _serviceSolicitud = serviceSolicitud;
             _logger = logger;
         }
 
@@ -30,6 +30,12 @@ namespace ComedorEstudiantil.Web.Controllers
             MenuPublicoDTO modelo =
                 await _serviceMenu.ListarPublicadosAsync(
                     fechaSeleccionada);
+
+            int? idUsuario = ObtenerIdUsuarioOpcional();
+
+            await _serviceSolicitud.AplicarEstadoSolicitudesAsync(
+                modelo.Menus,
+                idUsuario);
 
             return View(modelo);
         }
@@ -183,6 +189,15 @@ namespace ComedorEstudiantil.Web.Controllers
 
             formulario.TiposComida = catalogos.TiposComida;
             formulario.Actividades = catalogos.Actividades;
+        }
+        private int? ObtenerIdUsuarioOpcional()
+        {
+            string? valor = User.FindFirstValue(
+                ClaimTypes.NameIdentifier);
+
+            return int.TryParse(valor, out int idUsuario)
+                ? idUsuario
+                : null;
         }
     }
 }

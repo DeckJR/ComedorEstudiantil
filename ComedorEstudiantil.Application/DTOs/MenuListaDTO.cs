@@ -17,5 +17,9 @@ namespace ComedorEstudiantil.Application.DTOs
         public bool Publicado { get; set; }
         public string CreadoPor { get; set; } = string.Empty;
         public DateTime FechaCreacion { get; set; }
+        public bool SolicitudActiva { get; set; }
+        public int? IdSolicitud { get; set; }
+        public bool PuedeSolicitar { get; set; }
+        public string MensajeDisponibilidad { get; set; } = string.Empty;
     }
 }

@@ -2,25 +2,37 @@
 
 @{
     ViewData["Title"] = "Menú";
+    string returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
 
 <div class="container py-4">
     <div class="text-center mb-4">
         <h1 class="h3">Menú del comedor</h1>
         <p class="text-muted">
-            Consulte los alimentos disponibles para cada fecha.
+            Consulte y solicite los alimentos disponibles.
         </p>
     </div>
+
+    @if (TempData["MensajeExito"] is not null)
+    {
+        <div class="alert alert-success">
+            @TempData["MensajeExito"]
+        </div>
+    }
+
+    @if (TempData["MensajeError"] is not null)
+    {
+        <div class="alert alert-danger">
+            @TempData["MensajeError"]
+        </div>
+    }
 
     <form asp-controller="Menu"
           asp-action="Index"
           method="get"
           class="row justify-content-center mb-4">
         <div class="col-md-5">
-            <label for="fecha"
-                   class="form-label">
-                Fecha
-            </label>
+            <label for="fecha" class="form-label">Fecha</label>
 
             <div class="input-group">
                 <input id="fecha"
@@ -29,8 +41,7 @@
                        class="form-control"
                        value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
 
-                <button type="submit"
-                        class="btn btn-primary">
+                <button type="submit" class="btn btn-primary">
                     Consultar
                 </button>
             </div>
@@ -48,7 +59,7 @@
                             <h2 class="h5 mb-0">@menu.TipoComida</h2>
                         </div>
 
-                        <div class="card-body">
+                        <div class="card-body d-flex flex-column">
                             <p style="white-space: pre-line;">@menu.Descripcion</p>
 
                             @if (!string.IsNullOrWhiteSpace(menu.Actividad))
@@ -58,9 +69,86 @@
                                 </div>
                             }
 
-                            <div class="text-muted small">
-                                Hora límite para marcar:
+                            <div class="text-muted small mb-3">
+                                Hora límite:
                                 @menu.HoraLimiteMarcar.ToString("HH:mm")
+                            </div>
+
+                            <div class="mt-auto">
+                                @if (User.Identity?.IsAuthenticated != true)
+                                {
+                                    <a asp-controller="Cuenta"
+                                       asp-action="IniciarSesion"
+                                       class="btn btn-primary w-100">
+                                        Iniciar sesión para solicitar
+                                    </a>
+                                }
+                                else if (menu.SolicitudActiva)
+                                {
+                                    <div class="alert alert-success py-2">
+                                        Solicitud registrada
+                                    </div>
+
+                                    @if (menu.PuedeSolicitar &&
+                                   menu.IdSolicitud.HasValue)
+                                    {
+                                        <form asp-controller="Solicitud"
+                                              asp-action="Cancelar"
+                                              method="post">
+                                            @Html.AntiForgeryToken()
+
+                                            <input name="idSolicitud"
+                                                   value="@menu.IdSolicitud"
+                                                   type="hidden" />
+
+                                            <input name="returnUrl"
+                                                   value="@returnUrl"
+                                                   type="hidden" />
+
+                                            <button type="submit"
+                                                    class="btn btn-outline-danger w-100"
+                                                    onclick="return confirm('¿Desea cancelar esta solicitud?');">
+                                                Cancelar solicitud
+                                            </button>
+                                        </form>
+                                    }
+                                }
+                                else if (menu.PuedeSolicitar)
+                                {
+                                    <form asp-controller="Solicitud"
+                                          asp-action="Solicitar"
+                                          method="post">
+                                        @Html.AntiForgeryToken()
+
+                                        <input name="idMenu"
+                                               value="@menu.IdMenu"
+                                               type="hidden" />
+
+                                        <button type="submit"
+                                                class="btn btn-primary w-100">
+                                            Solicitar comida
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-secondary py-2">
+                                        @menu.MensajeDisponibilidad
+                                    </div>
+                                }
+
+                                @if (User.IsInRole("Cocina") ||
+                               User.IsInRole("Direccion") ||
+                               User.IsInRole("Director") ||
+                               User.IsInRole("Administrador"))
+                                {
+                                    <a asp-controller="Solicitud"
+                                       asp-action="RegistrarParaOtraPersona"
+                                       asp-route-idMenu="@menu.IdMenu"
+                                       class="btn btn-outline-secondary w-100 mt-2">
+                                        Solicitar para otra persona
+                                    </a>
+                                }
                             </div>
                         </div>
                     </div>

@@ -79,6 +79,8 @@ builder.Services.AddDbContext<ComedorEstudiantilContext>(options =>
     }
 });
 
+builder.Services.AddSingleton<IFechaHoraService,FechaHoraService>();
+
 builder.Services.AddScoped<IRepositoryUsuario,RepositoryUsuario>();
 builder.Services.AddScoped<IRepositoryRol, RepositoryRol>();
 builder.Services.AddScoped<IRepositoryGradoSeccion, RepositoryGradoSeccion>();
@@ -86,7 +88,9 @@ builder.Services.AddScoped<IRepositoryTipoBeneficiario, RepositoryTipoBeneficiar
 builder.Services.AddScoped<IRepositoryActividad, RepositoryActividad>();
 builder.Services.AddScoped<IRepositoryTipoComida, RepositoryTipoComida>();
 builder.Services.AddScoped<IRepositoryMenu, RepositoryMenu>();
+builder.Services.AddScoped<IRepositorySolicitud, RepositorySolicitud>();
 
+builder.Services.AddScoped<IServiceSolicitud, ServiceSolicitud>();
 builder.Services.AddScoped<IServiceMenu, ServiceMenu>();
 builder.Services.AddScoped<IServiceActividad, ServiceActividad>();
 builder.Services.AddScoped<IServiceUsuario, ServiceUsuario>();
