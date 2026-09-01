@@ -15,6 +15,9 @@ using ComedorEstudiantil.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+QuestPDF.Settings.License =
+    QuestPDF.Infrastructure.LicenseType.Community;
+
 var connectionString = builder.Configuration
     .GetConnectionString("MariaDbConnection");
 
@@ -80,6 +83,7 @@ builder.Services.AddDbContext<ComedorEstudiantilContext>(options =>
 });
 
 builder.Services.AddSingleton<IFechaHoraService,FechaHoraService>();
+builder.Services.AddSingleton<IReportePdfService, ReportePdfService>();
 
 builder.Services.AddScoped<IRepositoryUsuario,RepositoryUsuario>();
 builder.Services.AddScoped<IRepositoryRol, RepositoryRol>();
@@ -90,7 +94,9 @@ builder.Services.AddScoped<IRepositoryTipoComida, RepositoryTipoComida>();
 builder.Services.AddScoped<IRepositoryMenu, RepositoryMenu>();
 builder.Services.AddScoped<IRepositorySolicitud, RepositorySolicitud>();
 builder.Services.AddScoped<IRepositoryEntrega, RepositoryEntrega>();
+builder.Services.AddScoped<IRepositoryReporte, RepositoryReporte>();
 
+builder.Services.AddScoped<IServiceReporte, ServiceReporte>();
 builder.Services.AddScoped<IServiceEntrega, ServiceEntrega>();
 builder.Services.AddScoped<IServiceSolicitud, ServiceSolicitud>();
 builder.Services.AddScoped<IServiceMenu, ServiceMenu>();

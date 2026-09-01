@@ -1,0 +1,278 @@
+﻿@model ComedorEstudiantil.Application.DTOs.ReporteGeneralDTO
+
+@{
+    ViewData["Title"] = "Reportes";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h1 class="h3 mb-1">Reportes</h1>
+        <p class="text-muted mb-0">
+            Consulta de solicitudes y entregas del comedor estudiantil.
+        </p>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-controller="Reporte"
+                  asp-action="Index"
+                  method="get"
+                  class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label asp-for="Filtro.FechaInicio"
+                           class="form-label">
+                    </label>
+                    <input name="FechaInicio"
+                           type="date"
+                           value="@Model.Filtro.FechaInicio.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Filtro.FechaFin"
+                           class="form-label">
+                    </label>
+                    <input name="FechaFin"
+                           type="date"
+                           value="@Model.Filtro.FechaFin.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">
+                        Tipo de comida
+                    </label>
+                    <select name="TipoComida"
+                            class="form-select">
+                        <option value="">
+                            Todos
+                        </option>
+                        @foreach (string tipo in Model.TiposComida)
+                        {
+                            <option value="@tipo"
+                                    selected="@(Model.Filtro.TipoComida == tipo)">
+                                @tipo
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">
+                        Estado
+                    </label>
+                    <select name="Estado"
+                            class="form-select">
+                        <option value="">
+                            Todos
+                        </option>
+                        <option value="0"
+                                selected="@(Model.Filtro.Estado == 0)">
+                            Activa
+                        </option>
+                        <option value="1"
+                                selected="@(Model.Filtro.Estado == 1)">
+                            Cancelada
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+                        Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Solicitudes</div>
+                    <div class="fs-3 fw-bold">
+                        @Model.TotalSolicitudes
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Activas</div>
+                    <div class="fs-3 fw-bold text-success">
+                        @Model.TotalActivas
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Canceladas</div>
+                    <div class="fs-3 fw-bold text-secondary">
+                        @Model.TotalCanceladas
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Entregadas</div>
+                    <div class="fs-3 fw-bold text-primary">
+                        @Model.TotalEntregadas
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Pendientes</div>
+                    <div class="fs-3 fw-bold text-warning">
+                        @Model.TotalPendientes
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a asp-controller="Reporte"
+           asp-action="SolicitudesPdf"
+           asp-route-fechaInicio="@Model.Filtro.FechaInicio.ToString("yyyy-MM-dd")"
+           asp-route-fechaFin="@Model.Filtro.FechaFin.ToString("yyyy-MM-dd")"
+           asp-route-tipoComida="@Model.Filtro.TipoComida"
+           asp-route-estado="@Model.Filtro.Estado"
+           class="btn btn-outline-danger">
+            Descargar solicitudes PDF
+        </a>
+
+        <a asp-controller="Reporte"
+           asp-action="EntregasPdf"
+           asp-route-fechaInicio="@Model.Filtro.FechaInicio.ToString("yyyy-MM-dd")"
+           asp-route-fechaFin="@Model.Filtro.FechaFin.ToString("yyyy-MM-dd")"
+           asp-route-tipoComida="@Model.Filtro.TipoComida"
+           asp-route-estado="@Model.Filtro.Estado"
+           class="btn btn-outline-danger">
+            Descargar entregas PDF
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <strong>Solicitudes</strong>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Identificación</th>
+                            <th>Usuario</th>
+                            <th>Rol</th>
+                            <th>Beneficio</th>
+                            <th>Grupo</th>
+                            <th>Estado</th>
+                            <th>Entrega</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var solicitud in Model.Solicitudes)
+                        {
+                            <tr>
+                                <td>
+                                    @solicitud.FechaMenu.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>@solicitud.TipoComida</td>
+                                <td>@solicitud.Identificacion</td>
+                                <td>@solicitud.NombreUsuario</td>
+                                <td>@solicitud.Rol</td>
+                                <td>@solicitud.TipoBeneficiario</td>
+                                <td>@solicitud.GradoSeccion</td>
+                                <td>@solicitud.Estado</td>
+                                <td>
+                                    @(solicitud.Entregada
+                                        ? "Entregada"
+                                        : "Pendiente")
+                                </td>
+                            </tr>
+                        }
+
+                        @if (!Model.Solicitudes.Any())
+                        {
+                            <tr>
+                                <td colspan="9"
+                                    class="text-center text-muted py-4">
+                                    No existen solicitudes para el periodo seleccionado.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <strong>Entregas</strong>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Identificación</th>
+                            <th>Usuario</th>
+                            <th>Rol</th>
+                            <th>Hora</th>
+                            <th>Método</th>
+                            <th>Registrado por</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entrega in Model.Entregas)
+                        {
+                            <tr>
+                                <td>
+                                    @entrega.FechaMenu.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>@entrega.TipoComida</td>
+                                <td>@entrega.Identificacion</td>
+                                <td>@entrega.NombreUsuario</td>
+                                <td>@entrega.Rol</td>
+                                <td>
+                                    @entrega.FechaHoraEntrega.ToString("HH:mm")
+                                </td>
+                                <td>@entrega.MetodoEntrega</td>
+                                <td>@entrega.EntregadoPor</td>
+                            </tr>
+                        }
+
+                        @if (!Model.Entregas.Any())
+                        {
+                            <tr>
+                                <td colspan="8"
+                                    class="text-center text-muted py-4">
+                                    No existen entregas para el periodo seleccionado.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
