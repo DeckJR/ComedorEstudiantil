@@ -1,0 +1,110 @@
+﻿@model ComedorEstudiantil.Application.DTOs.RegistroEntregaDTO
+
+@{
+    ViewData["Title"] = "Registrar entrega";
+}
+
+<div class="container py-4">
+    <h1 class="h3 mb-4">Registrar entrega</h1>
+
+    @if (TempData["MensajeExito"] is not null)
+    {
+        <div class="alert alert-success">
+            @TempData["MensajeExito"]
+        </div>
+    }
+
+    @if (TempData["MensajeError"] is not null)
+    {
+        <div class="alert alert-danger">
+            @TempData["MensajeError"]
+        </div>
+    }
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-controller="Entrega"
+                  asp-action="Registrar"
+                  method="get">
+                <label asp-for="Identificacion"
+                       class="form-label">
+                </label>
+
+                <div class="input-group">
+                    <input asp-for="Identificacion"
+                           class="form-control"
+                           autofocus />
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.BusquedaRealizada)
+    {
+        @if (string.IsNullOrWhiteSpace(Model.NombreUsuario))
+        {
+            <div class="alert alert-warning">
+                No se encontró un usuario activo con esa identificación.
+            </div>
+        }
+        else
+        {
+            <h2 class="h5 mb-3">
+                Solicitudes de @Model.NombreUsuario
+            </h2>
+
+            @if (Model.Solicitudes.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var solicitud in Model.Solicitudes)
+                    {
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h3 class="h5">
+                                        @solicitud.TipoComida
+                                    </h3>
+
+                                    <p>
+                                        @solicitud.DescripcionMenu
+                                    </p>
+
+                                    <form asp-controller="Entrega"
+                                          asp-action="Registrar"
+                                          method="post">
+                                        @Html.AntiForgeryToken()
+
+                                        <input name="idSolicitud"
+                                               value="@solicitud.IdSolicitud"
+                                               type="hidden" />
+
+                                        <input name="identificacion"
+                                               value="@Model.Identificacion"
+                                               type="hidden" />
+
+                                        <button type="submit"
+                                                class="btn btn-success"
+                                                onclick="return confirm('¿Confirma la entrega?');">
+                                            Registrar entrega
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    El usuario no tiene solicitudes activas pendientes de entrega para hoy.
+                </div>
+            }
+        }
+    }
+</div>

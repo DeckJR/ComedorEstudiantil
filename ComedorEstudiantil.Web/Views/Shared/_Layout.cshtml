@@ -60,6 +60,27 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark"
+                                   asp-controller="Entrega"
+                                   asp-action="Registrar">
+                                    Registrar entrega
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Entrega"
+                                   asp-action="Index">
+                                    Entregas del día
+                                </a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Cocina") ||
+                        User.IsInRole("Direccion") ||
+                        User.IsInRole("Director") ||
+                        User.IsInRole("Administrador"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
                                    asp-controller="Actividad"
                                    asp-action="Index">
                                     Actividades

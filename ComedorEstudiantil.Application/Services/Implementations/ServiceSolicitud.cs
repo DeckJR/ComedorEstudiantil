@@ -121,12 +121,15 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                         : "Cancelada",
                     Activa = activa,
                     PuedeCancelar = activa &&
+                        solicitud.Entrega is null &&
                         EstaDentroDelPlazo(
                             menu.Fecha,
-                            menu.IdTipoComidaNavigation
-                                .HoraLimiteMarcar,
+                            menu.IdTipoComidaNavigation.HoraLimiteMarcar,
                             ahora),
-                    Entregada = solicitud.Entrega is not null
+                    Entregada = solicitud.Entrega is not null,
+                    PuedeRegistrarEntrega = activa &&
+                        solicitud.Entrega is null &&
+                        menu.Fecha == DateOnly.FromDateTime(ahora)
                 };
             }).ToList();
         }

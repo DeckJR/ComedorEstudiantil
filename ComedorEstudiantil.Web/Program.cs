@@ -89,7 +89,9 @@ builder.Services.AddScoped<IRepositoryActividad, RepositoryActividad>();
 builder.Services.AddScoped<IRepositoryTipoComida, RepositoryTipoComida>();
 builder.Services.AddScoped<IRepositoryMenu, RepositoryMenu>();
 builder.Services.AddScoped<IRepositorySolicitud, RepositorySolicitud>();
+builder.Services.AddScoped<IRepositoryEntrega, RepositoryEntrega>();
 
+builder.Services.AddScoped<IServiceEntrega, ServiceEntrega>();
 builder.Services.AddScoped<IServiceSolicitud, ServiceSolicitud>();
 builder.Services.AddScoped<IServiceMenu, ServiceMenu>();
 builder.Services.AddScoped<IServiceActividad, ServiceActividad>();

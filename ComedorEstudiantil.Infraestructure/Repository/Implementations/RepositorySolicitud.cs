@@ -95,5 +95,40 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
         {
             await _context.SaveChangesAsync();
         }
+        public async Task<List<Solicitud>>
+    ListarActivasPorUsuarioYFechaAsync(
+        int idUsuario,
+        DateOnly fecha)
+        {
+            return await _context.Set<Solicitud>()
+                .AsNoTracking()
+                .Include(solicitud => solicitud.IdMenuNavigation)
+                    .ThenInclude(menu =>
+                        menu.IdTipoComidaNavigation)
+                .Include(solicitud => solicitud.Entrega)
+                .Where(solicitud =>
+                    solicitud.IdUsuario == idUsuario &&
+                    solicitud.IdMenuNavigation.Fecha == fecha &&
+                    solicitud.Estado == 0 &&
+                    solicitud.Entrega == null)
+                .OrderBy(solicitud =>
+                    solicitud.IdMenuNavigation
+                        .IdTipoComidaNavigation
+                        .HoraLimiteMarcar)
+                .ToListAsync();
+        }
+
+        public async Task<Solicitud?> BuscarPorIdAsync(
+            int idSolicitud)
+        {
+            return await _context.Set<Solicitud>()
+                .Include(solicitud => solicitud.IdMenuNavigation)
+                    .ThenInclude(menu =>
+                        menu.IdTipoComidaNavigation)
+                .Include(solicitud => solicitud.IdUsuarioNavigation)
+                .Include(solicitud => solicitud.Entrega)
+                .FirstOrDefaultAsync(solicitud =>
+                    solicitud.IdSolicitud == idSolicitud);
+        }
     }
 }

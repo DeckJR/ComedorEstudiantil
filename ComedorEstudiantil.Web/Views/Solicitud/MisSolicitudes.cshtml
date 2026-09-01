@@ -36,22 +36,36 @@
                             <th class="text-end">Acción</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         @foreach (var solicitud in Model)
                         {
                             <tr>
-                                <td>@solicitud.FechaMenu.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @solicitud.FechaMenu.ToString("dd/MM/yyyy")
+                                </td>
                                 <td>@solicitud.TipoComida</td>
                                 <td>@solicitud.DescripcionMenu</td>
-                                <td>@solicitud.FechaHoraSolicitud.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @solicitud.FechaHoraSolicitud.ToString("dd/MM/yyyy HH:mm")
+                                </td>
                                 <td>
                                     <span class="badge @(solicitud.Activa ? "bg-success" : "bg-secondary")">
                                         @solicitud.Estado
                                     </span>
                                 </td>
                                 <td>
-                                    @(solicitud.Entregada ? "Entregada" : "Pendiente")
+                                    @if (solicitud.Entregada)
+                                    {
+                                        <span class="badge bg-primary">
+                                            Entregada
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            Pendiente
+                                        </span>
+                                    }
                                 </td>
                                 <td class="text-end">
                                     @if (solicitud.PuedeCancelar)
@@ -71,6 +85,12 @@
                                                 Cancelar
                                             </button>
                                         </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            Sin acciones
+                                        </span>
                                     }
                                 </td>
                             </tr>
