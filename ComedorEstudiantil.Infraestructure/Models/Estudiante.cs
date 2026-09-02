@@ -13,8 +13,6 @@ public partial class Estudiante
 
     public int? IdGradoSeccion { get; set; }
 
-    public string? CodigoAcceso { get; set; }
-
     public short AnioIngreso { get; set; }
 
     public bool? Activo { get; set; }

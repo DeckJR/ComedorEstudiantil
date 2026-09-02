@@ -24,6 +24,8 @@ public partial class ComedorEstudiantilContext : DbContext
 
     public virtual DbSet<Menu> Menu { get; set; }
 
+    public virtual DbSet<Repeticionentrega> Repeticionentrega { get; set; }
+
     public virtual DbSet<Rol> Rol { get; set; }
 
     public virtual DbSet<Solicitud> Solicitud { get; set; }
@@ -121,8 +123,6 @@ public partial class ComedorEstudiantilContext : DbContext
 
             entity.ToTable("estudiante");
 
-            entity.HasIndex(e => e.CodigoAcceso, "CodigoAcceso").IsUnique();
-
             entity.HasIndex(e => e.IdGradoSeccion, "FK_Estudiante_GradoSeccion");
 
             entity.HasIndex(e => e.IdTipoBeneficiario, "FK_Estudiante_TipoBeneficiario");
@@ -134,7 +134,6 @@ public partial class ComedorEstudiantilContext : DbContext
                 .IsRequired()
                 .HasDefaultValueSql("'1'");
             entity.Property(e => e.AnioIngreso).HasColumnType("year(4)");
-            entity.Property(e => e.CodigoAcceso).HasMaxLength(50);
             entity.Property(e => e.IdGradoSeccion).HasColumnType("int(11)");
             entity.Property(e => e.IdTipoBeneficiario).HasColumnType("int(11)");
             entity.Property(e => e.IdUsuario).HasColumnType("int(11)");
@@ -205,6 +204,39 @@ public partial class ComedorEstudiantilContext : DbContext
                 .HasForeignKey(d => d.IdUsuarioCreador)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Menu_UsuarioCreador");
+        });
+
+        modelBuilder.Entity<Repeticionentrega>(entity =>
+        {
+            entity.HasKey(e => e.IdRepeticionEntrega).HasName("PRIMARY");
+
+            entity.ToTable("repeticionentrega");
+
+            entity.HasIndex(e => e.IdUsuarioRegistro, "FK_RepeticionEntrega_UsuarioRegistro");
+
+            entity.HasIndex(e => e.FechaHoraRepeticion, "IX_RepeticionEntrega_FechaHora");
+
+            entity.HasIndex(e => e.IdEntrega, "IX_RepeticionEntrega_IdEntrega");
+
+            entity.Property(e => e.IdRepeticionEntrega).HasColumnType("int(11)");
+            entity.Property(e => e.FechaHoraRepeticion)
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IdEntrega).HasColumnType("int(11)");
+            entity.Property(e => e.IdUsuarioRegistro).HasColumnType("int(11)");
+            entity.Property(e => e.MetodoRegistro)
+                .HasDefaultValueSql("'2'")
+                .HasColumnType("tinyint(4)");
+
+            entity.HasOne(d => d.IdEntregaNavigation).WithMany(p => p.Repeticionentrega)
+                .HasForeignKey(d => d.IdEntrega)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RepeticionEntrega_Entrega");
+
+            entity.HasOne(d => d.IdUsuarioRegistroNavigation).WithMany(p => p.Repeticionentrega)
+                .HasForeignKey(d => d.IdUsuarioRegistro)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RepeticionEntrega_UsuarioRegistro");
         });
 
         modelBuilder.Entity<Rol>(entity =>
@@ -298,11 +330,14 @@ public partial class ComedorEstudiantilContext : DbContext
 
             entity.HasIndex(e => e.Identificacion, "Identificacion").IsUnique();
 
+            entity.HasIndex(e => e.CodigoBarras, "UQ_Usuario_CodigoBarras").IsUnique();
+
             entity.Property(e => e.IdUsuario).HasColumnType("int(11)");
             entity.Property(e => e.Activo)
                 .IsRequired()
                 .HasDefaultValueSql("'1'");
             entity.Property(e => e.Apellidos).HasMaxLength(100);
+            entity.Property(e => e.CodigoBarras).HasMaxLength(50);
             entity.Property(e => e.ContrasenaHash).HasMaxLength(255);
             entity.Property(e => e.Correo).HasMaxLength(150);
             entity.Property(e => e.FechaCreacion)

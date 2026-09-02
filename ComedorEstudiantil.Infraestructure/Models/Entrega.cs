@@ -18,4 +18,6 @@ public partial class Entrega
     public virtual Solicitud IdSolicitudNavigation { get; set; } = null!;
 
     public virtual Usuario IdUsuarioEntregoNavigation { get; set; } = null!;
+
+    public virtual ICollection<Repeticionentrega> Repeticionentrega { get; set; } = new List<Repeticionentrega>();
 }

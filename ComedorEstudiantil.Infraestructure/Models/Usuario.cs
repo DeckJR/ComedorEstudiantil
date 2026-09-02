@@ -13,6 +13,8 @@ public partial class Usuario
 
     public string Identificacion { get; set; } = null!;
 
+    public string CodigoBarras { get; set; } = null!;
+
     public string Correo { get; set; } = null!;
 
     public string ContrasenaHash { get; set; } = null!;
@@ -36,6 +38,8 @@ public partial class Usuario
     public virtual Rol IdRolNavigation { get; set; } = null!;
 
     public virtual ICollection<Menu> Menu { get; set; } = new List<Menu>();
+
+    public virtual ICollection<Repeticionentrega> Repeticionentrega { get; set; } = new List<Repeticionentrega>();
 
     public virtual ICollection<Solicitud> SolicitudIdUsuarioMarcoNavigation { get; set; } = new List<Solicitud>();
 
