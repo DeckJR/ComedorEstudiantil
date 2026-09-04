@@ -1,19 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ComedorEstudiantil.Application.DTOs;
+﻿using ComedorEstudiantil.Application.DTOs;
 
 namespace ComedorEstudiantil.Application.Services.Interfaces
 {
     public interface IServiceEntrega
     {
         Task<List<EntregaListaDTO>> ListarDelDiaAsync();
-        Task<RegistroEntregaDTO> BuscarSolicitudesPendientesAsync(
-            string? identificacion);
+
+        Task<RegistroEntregaDTO> PrepararRegistroAsync(
+            string? identificacion,
+            int? idMenuSeleccionado);
+
         Task<ResultadoOperacionDTO> RegistrarPorFuncionarioAsync(
             int idSolicitud,
+            int idUsuarioFuncionario);
+
+        Task<ResultadoEscaneoEntregaDTO> RegistrarPorCodigoBarrasAsync(
+            string codigoBarras,
+            int idMenu,
+            int idUsuarioFuncionario);
+
+        Task<ResultadoOperacionDTO> RegistrarRepeticionManualAsync(
+            int idEntrega,
+            int idUsuarioFuncionario);
+
+        Task<ResultadoOperacionDTO> RegistrarRepeticionCodigoBarrasAsync(
+            int idEntrega,
             int idUsuarioFuncionario);
     }
 }

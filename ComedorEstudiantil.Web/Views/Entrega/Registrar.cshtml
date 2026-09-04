@@ -9,23 +9,122 @@
 
     @if (TempData["MensajeExito"] is not null)
     {
-        <div class="alert alert-success">
-            @TempData["MensajeExito"]
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            <strong>Entrega registrada.</strong>
+            <div>@TempData["MensajeExito"]</div>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar">
+            </button>
         </div>
     }
 
     @if (TempData["MensajeError"] is not null)
     {
-        <div class="alert alert-danger">
-            @TempData["MensajeError"]
+        <div class="alert alert-warning alert-dismissible fade show"
+             role="alert">
+            <strong>No se pudo registrar la entrega.</strong>
+            <div>@TempData["MensajeError"]</div>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar">
+            </button>
         </div>
     }
 
     <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <strong>Registrar con código de barras</strong>
+        </div>
+
+        <div class="card-body">
+            @if (Model.MenusDisponibles.Any())
+            {
+                <form asp-controller="Entrega"
+                      asp-action="RegistrarCodigoBarras"
+                      method="post"
+                      id="formularioCodigoBarras">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="IdMenuSeleccionado"
+                               class="form-label">
+                        </label>
+
+                        <select name="idMenu"
+                                id="selectorMenu"
+                                class="form-select"
+                                required>
+                            <option value="">
+                                Seleccione el menú
+                            </option>
+
+                            @foreach (var menu in Model.MenusDisponibles)
+                            {
+                                <option value="@menu.Id"
+                                        selected="@(Model.IdMenuSeleccionado == menu.Id)">
+                                    @menu.Nombre
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div>
+                        <label asp-for="CodigoBarras"
+                               class="form-label">
+                        </label>
+
+                        <div class="input-group">
+                            <input name="codigoBarras"
+                                   id="campoCodigoBarras"
+                                   class="form-control"
+                                   maxlength="50"
+                                   autocomplete="off"
+                                   placeholder="Escanee el código"
+                                   autofocus />
+
+                            <button type="submit"
+                                    class="btn btn-success">
+                                Registrar
+                            </button>
+                        </div>
+
+                        <div class="form-text">
+                            Seleccione el menú y escanee el código. El lector enviará la información automáticamente.
+                        </div>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    No existen menús publicados y activos para hoy.
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <strong>Registrar manualmente por cédula</strong>
+        </div>
+
         <div class="card-body">
             <form asp-controller="Entrega"
                   asp-action="Registrar"
                   method="get">
+                @if (Model.IdMenuSeleccionado.HasValue)
+                {
+                    <input name="idMenu"
+                           value="@Model.IdMenuSeleccionado"
+                           type="hidden" />
+                }
+
                 <label asp-for="Identificacion"
                        class="form-label">
                 </label>
@@ -33,7 +132,8 @@
                 <div class="input-group">
                     <input asp-for="Identificacion"
                            class="form-control"
-                           autofocus />
+                           autocomplete="off"
+                           placeholder="Digite la cédula" />
 
                     <button type="submit"
                             class="btn btn-primary">
@@ -46,10 +146,10 @@
 
     @if (Model.BusquedaRealizada)
     {
-        @if (string.IsNullOrWhiteSpace(Model.NombreUsuario))
+        if (string.IsNullOrWhiteSpace(Model.NombreUsuario))
         {
             <div class="alert alert-warning">
-                No se encontró un usuario activo con esa identificación.
+                @(Model.MensajeBusqueda ?? "No se encontró el usuario.")
             </div>
         }
         else
@@ -73,6 +173,11 @@
                                     <p>
                                         @solicitud.DescripcionMenu
                                     </p>
+
+                                    <div class="text-muted small mb-3">
+                                        Solicitud:
+                                        @solicitud.FechaHoraSolicitud.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
 
                                     <form asp-controller="Entrega"
                                           asp-action="Registrar"
@@ -102,9 +207,32 @@
             else
             {
                 <div class="alert alert-info">
-                    El usuario no tiene solicitudes activas pendientes de entrega para hoy.
+                    @Model.MensajeBusqueda
                 </div>
             }
         }
     }
 </div>
+
+@section Scripts
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const selectorMenu = document.getElementById("selectorMenu");
+            const campoCodigo = document.getElementById("campoCodigoBarras");
+
+            if (!selectorMenu || !campoCodigo) {
+                return;
+            }
+
+            function enfocarCodigo() {
+                if (selectorMenu.value) {
+                    campoCodigo.focus();
+                }
+            }
+
+            selectorMenu.addEventListener("change", enfocarCodigo);
+            enfocarCodigo();
+        });
+    </script>
+}

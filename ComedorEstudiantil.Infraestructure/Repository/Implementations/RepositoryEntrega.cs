@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ComedorEstudiantil.Infraestructure.Data;
+﻿using ComedorEstudiantil.Infraestructure.Data;
 using ComedorEstudiantil.Infraestructure.Models;
 using ComedorEstudiantil.Infraestructure.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -38,12 +33,33 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
                         menu.IdTipoComidaNavigation)
                 .Include(entrega =>
                     entrega.IdUsuarioEntregoNavigation)
+                .Include(entrega =>
+                    entrega.Repeticionentrega)
                 .Where(entrega =>
                     entrega.FechaHoraEntrega >= inicio &&
                     entrega.FechaHoraEntrega < final)
                 .OrderByDescending(entrega =>
                     entrega.FechaHoraEntrega)
                 .ToListAsync();
+        }
+
+        public async Task<Entrega?> BuscarPorIdAsync(
+            int idEntrega)
+        {
+            return await _context.Set<Entrega>()
+                .AsNoTracking()
+                .Include(entrega =>
+                    entrega.IdSolicitudNavigation)
+                    .ThenInclude(solicitud =>
+                        solicitud.IdUsuarioNavigation)
+                .Include(entrega =>
+                    entrega.IdSolicitudNavigation)
+                    .ThenInclude(solicitud =>
+                        solicitud.IdMenuNavigation)
+                    .ThenInclude(menu =>
+                        menu.IdTipoComidaNavigation)
+                .FirstOrDefaultAsync(entrega =>
+                    entrega.IdEntrega == idEntrega);
         }
 
         public async Task<Entrega?> BuscarPorSolicitudAsync(
@@ -55,9 +71,12 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
                     entrega.IdSolicitud == idSolicitud);
         }
 
-        public async Task AgregarAsync(Entrega entrega)
+        public async Task AgregarAsync(
+            Entrega entrega)
         {
-            await _context.Set<Entrega>().AddAsync(entrega);
+            await _context.Set<Entrega>()
+                .AddAsync(entrega);
+
             await _context.SaveChangesAsync();
         }
     }

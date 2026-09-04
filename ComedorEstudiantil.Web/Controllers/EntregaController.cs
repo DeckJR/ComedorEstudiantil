@@ -32,11 +32,14 @@ namespace ComedorEstudiantil.Web.Controllers
 
         [Authorize(Policy = PoliticasAutorizacion.RegistrarEntrega)]
         [HttpGet]
-        public async Task<IActionResult> Registrar(string? identificacion)
+        public async Task<IActionResult> Registrar(
+            string? identificacion,
+            int? idMenu)
         {
             RegistroEntregaDTO modelo =
-                await _serviceEntrega.BuscarSolicitudesPendientesAsync(
-                    identificacion);
+                await _serviceEntrega.PrepararRegistroAsync(
+                    identificacion,
+                    idMenu);
 
             return View(modelo);
         }
@@ -49,9 +52,10 @@ namespace ComedorEstudiantil.Web.Controllers
             string identificacion)
         {
             ResultadoOperacionDTO resultado =
-                await _serviceEntrega.RegistrarPorFuncionarioAsync(
-                    idSolicitud,
-                    ObtenerIdUsuarioActual());
+                await _serviceEntrega
+                    .RegistrarPorFuncionarioAsync(
+                        idSolicitud,
+                        ObtenerIdUsuarioActual());
 
             GuardarResultado(resultado);
 
@@ -63,10 +67,43 @@ namespace ComedorEstudiantil.Web.Controllers
                 });
         }
 
+        [Authorize(Policy = PoliticasAutorizacion.RegistrarEntrega)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegistrarCodigoBarras(
+            int? idMenu,
+            string? codigoBarras)
+        {
+            if (!idMenu.HasValue)
+            {
+                TempData["MensajeError"] =
+                    "Debe seleccionar el menú que está entregando.";
+
+                return RedirectToAction(nameof(Registrar));
+            }
+
+            ResultadoOperacionDTO resultado =
+                await _serviceEntrega
+                    .RegistrarPorCodigoBarrasAsync(
+                        codigoBarras ?? string.Empty,
+                        idMenu.Value,
+                        ObtenerIdUsuarioActual());
+
+            GuardarResultado(resultado);
+
+            return RedirectToAction(
+                nameof(Registrar),
+                new
+                {
+                    idMenu = idMenu.Value
+                });
+        }
+
         private int ObtenerIdUsuarioActual()
         {
-            string? valor = User.FindFirstValue(
-                ClaimTypes.NameIdentifier);
+            string? valor =
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
 
             if (!int.TryParse(valor, out int idUsuario))
             {
@@ -82,11 +119,13 @@ namespace ComedorEstudiantil.Web.Controllers
         {
             if (resultado.Exitoso)
             {
-                TempData["MensajeExito"] = resultado.Mensaje;
+                TempData["MensajeExito"] =
+                    resultado.Mensaje;
             }
             else
             {
-                TempData["MensajeError"] = resultado.Mensaje;
+                TempData["MensajeError"] =
+                    resultado.Mensaje;
             }
         }
     }
