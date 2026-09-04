@@ -9,5 +9,6 @@
         public string DescripcionMenu { get; set; } = string.Empty;
         public DateTime FechaHoraSolicitud { get; set; }
         public bool Entregada { get; set; }
+        public int CantidadRepeticiones { get; set; }
     }
 }

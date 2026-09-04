@@ -19,6 +19,9 @@ namespace ComedorEstudiantil.Application.Services.Interfaces
             int idMenu,
             int idUsuarioFuncionario);
 
+        Task<ResultadoEscaneoEntregaDTO> PrepararRepeticionManualAsync(
+            int idEntrega);
+
         Task<ResultadoOperacionDTO> RegistrarRepeticionManualAsync(
             int idEntrega,
             int idUsuarioFuncionario);

@@ -8,5 +8,6 @@
         public int? IdEntrega { get; set; }
         public string? NombreUsuario { get; set; }
         public string? Identificacion { get; set; }
+        public int CantidadRepeticiones { get; set; }
     }
 }

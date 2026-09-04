@@ -65,6 +65,8 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
                         menu.IdTipoComidaNavigation)
                 .Include(solicitud =>
                     solicitud.Entrega)
+                    .ThenInclude(entrega =>
+                        entrega!.Repeticionentrega)
                 .Where(solicitud =>
                     solicitud.IdUsuario == idUsuario &&
                     solicitud.IdMenuNavigation.Fecha == fecha)
@@ -118,6 +120,8 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
                         menu.IdActividadNavigation)
                 .Include(solicitud =>
                     solicitud.Entrega)
+                    .ThenInclude(entrega =>
+                        entrega!.Repeticionentrega)
                 .FirstOrDefaultAsync(solicitud =>
                     solicitud.IdUsuario == idUsuario &&
                     solicitud.IdMenu == idMenu);

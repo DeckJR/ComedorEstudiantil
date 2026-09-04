@@ -58,15 +58,19 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
                         solicitud.IdMenuNavigation)
                     .ThenInclude(menu =>
                         menu.IdTipoComidaNavigation)
+                    .Include(entrega =>
+                        entrega.Repeticionentrega)
                 .FirstOrDefaultAsync(entrega =>
                     entrega.IdEntrega == idEntrega);
         }
 
         public async Task<Entrega?> BuscarPorSolicitudAsync(
-            int idSolicitud)
+    int idSolicitud)
         {
             return await _context.Set<Entrega>()
                 .AsNoTracking()
+                .Include(entrega =>
+                    entrega.Repeticionentrega)
                 .FirstOrDefaultAsync(entrega =>
                     entrega.IdSolicitud == idSolicitud);
         }

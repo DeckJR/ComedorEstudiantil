@@ -49,7 +49,8 @@ namespace ComedorEstudiantil.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Registrar(
             int idSolicitud,
-            string identificacion)
+            string identificacion,
+            int? idMenu)
         {
             ResultadoOperacionDTO resultado =
                 await _serviceEntrega
@@ -63,7 +64,8 @@ namespace ComedorEstudiantil.Web.Controllers
                 nameof(Registrar),
                 new
                 {
-                    identificacion
+                    identificacion,
+                    idMenu
                 });
         }
 
@@ -79,14 +81,83 @@ namespace ComedorEstudiantil.Web.Controllers
                 TempData["MensajeError"] =
                     "Debe seleccionar el menú que está entregando.";
 
-                return RedirectToAction(nameof(Registrar));
+                return RedirectToAction(
+                    nameof(Registrar));
             }
 
-            ResultadoOperacionDTO resultado =
+            ResultadoEscaneoEntregaDTO resultado =
                 await _serviceEntrega
                     .RegistrarPorCodigoBarrasAsync(
                         codigoBarras ?? string.Empty,
                         idMenu.Value,
+                        ObtenerIdUsuarioActual());
+
+            if (resultado.RequiereConfirmarRepeticion)
+            {
+                GuardarConfirmacionRepeticion(
+                    resultado,
+                    "CodigoBarras",
+                    null);
+            }
+            else
+            {
+                GuardarResultadoEscaneo(resultado);
+            }
+
+            return RedirectToAction(
+                nameof(Registrar),
+                new
+                {
+                    idMenu = idMenu.Value
+                });
+        }
+
+        [Authorize(Policy = PoliticasAutorizacion.RegistrarEntrega)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PrepararRepeticionManual(
+            int idEntrega,
+            string identificacion,
+            int? idMenu)
+        {
+            ResultadoEscaneoEntregaDTO resultado =
+                await _serviceEntrega
+                    .PrepararRepeticionManualAsync(
+                        idEntrega);
+
+            if (resultado.RequiereConfirmarRepeticion)
+            {
+                GuardarConfirmacionRepeticion(
+                    resultado,
+                    "Manual",
+                    identificacion);
+            }
+            else
+            {
+                GuardarResultadoEscaneo(resultado);
+            }
+
+            return RedirectToAction(
+                nameof(Registrar),
+                new
+                {
+                    identificacion,
+                    idMenu
+                });
+        }
+
+        [Authorize(Policy = PoliticasAutorizacion.RegistrarEntrega)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegistrarRepeticionManual(
+            int idEntrega,
+            string identificacion,
+            int? idMenu)
+        {
+            ResultadoOperacionDTO resultado =
+                await _serviceEntrega
+                    .RegistrarRepeticionManualAsync(
+                        idEntrega,
                         ObtenerIdUsuarioActual());
 
             GuardarResultado(resultado);
@@ -95,8 +166,55 @@ namespace ComedorEstudiantil.Web.Controllers
                 nameof(Registrar),
                 new
                 {
-                    idMenu = idMenu.Value
+                    identificacion,
+                    idMenu
                 });
+        }
+
+        [Authorize(Policy = PoliticasAutorizacion.RegistrarEntrega)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult>
+            RegistrarRepeticionCodigoBarras(
+                int idEntrega,
+                int idMenu)
+        {
+            ResultadoOperacionDTO resultado =
+                await _serviceEntrega
+                    .RegistrarRepeticionCodigoBarrasAsync(
+                        idEntrega,
+                        ObtenerIdUsuarioActual());
+
+            GuardarResultado(resultado);
+
+            return RedirectToAction(
+                nameof(Registrar),
+                new
+                {
+                    idMenu
+                });
+        }
+
+        private void GuardarConfirmacionRepeticion(
+            ResultadoEscaneoEntregaDTO resultado,
+            string origen,
+            string? identificacionBusqueda)
+        {
+            TempData["ConfirmarRepeticion"] = true;
+            TempData["IdEntregaRepeticion"] =
+                resultado.IdEntrega;
+            TempData["NombreRepeticion"] =
+                resultado.NombreUsuario;
+            TempData["IdentificacionRepeticion"] =
+                resultado.Identificacion;
+            TempData["CantidadRepeticiones"] =
+                resultado.CantidadRepeticiones;
+            TempData["MensajeRepeticion"] =
+                resultado.Mensaje;
+            TempData["OrigenRepeticion"] =
+                origen;
+            TempData["IdentificacionBusqueda"] =
+                identificacionBusqueda;
         }
 
         private int ObtenerIdUsuarioActual()
@@ -116,6 +234,21 @@ namespace ComedorEstudiantil.Web.Controllers
 
         private void GuardarResultado(
             ResultadoOperacionDTO resultado)
+        {
+            if (resultado.Exitoso)
+            {
+                TempData["MensajeExito"] =
+                    resultado.Mensaje;
+            }
+            else
+            {
+                TempData["MensajeError"] =
+                    resultado.Mensaje;
+            }
+        }
+
+        private void GuardarResultadoEscaneo(
+            ResultadoEscaneoEntregaDTO resultado)
         {
             if (resultado.Exitoso)
             {

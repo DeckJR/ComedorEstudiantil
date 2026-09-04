@@ -12,6 +12,7 @@ namespace ComedorEstudiantil.Application.Services.Implementations
         private readonly IRepositorySolicitud _repositorySolicitud;
         private readonly IRepositoryUsuario _repositoryUsuario;
         private readonly IRepositoryMenu _repositoryMenu;
+        private readonly IRepositoryRepeticionEntrega _repositoryRepeticionEntrega;
         private readonly IFechaHoraService _fechaHoraService;
 
         public ServiceEntrega(
@@ -19,12 +20,14 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             IRepositorySolicitud repositorySolicitud,
             IRepositoryUsuario repositoryUsuario,
             IRepositoryMenu repositoryMenu,
+            IRepositoryRepeticionEntrega repositoryRepeticionEntrega,
             IFechaHoraService fechaHoraService)
         {
             _repositoryEntrega = repositoryEntrega;
             _repositorySolicitud = repositorySolicitud;
             _repositoryUsuario = repositoryUsuario;
             _repositoryMenu = repositoryMenu;
+            _repositoryRepeticionEntrega = repositoryRepeticionEntrega;
             _fechaHoraService = fechaHoraService;
         }
 
@@ -87,13 +90,14 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             {
                 Identificacion = identificacion,
                 IdMenuSeleccionado = idMenuSeleccionado,
-                MenusDisponibles = menus.Select(menu =>
-                    new CatalogoDTO
-                    {
-                        Id = menu.IdMenu,
-                        Nombre =
-                            $"{menu.IdTipoComidaNavigation.Nombre} - {menu.Descripcion}"
-                    })
+                MenusDisponibles = menus
+                    .Select(menu =>
+                        new CatalogoDTO
+                        {
+                            Id = menu.IdMenu,
+                            Nombre =
+                                $"{menu.IdTipoComidaNavigation.Nombre} - {menu.Descripcion}"
+                        })
                     .ToList()
             };
 
@@ -137,13 +141,14 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             resultado.Solicitudes = solicitudes
                 .Where(solicitud =>
                     solicitud.Estado ==
-                        (sbyte)EstadoSolicitud.Activa &&
-                    solicitud.Entrega is null)
+                    (sbyte)EstadoSolicitud.Activa)
                 .Select(solicitud =>
                     new SolicitudPendienteEntregaDTO
                     {
                         IdSolicitud =
                             solicitud.IdSolicitud,
+                        IdEntrega =
+                            solicitud.Entrega?.IdEntrega,
                         FechaMenu =
                             solicitud.IdMenuNavigation.Fecha,
                         TipoComida =
@@ -152,36 +157,24 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                         DescripcionMenu =
                             solicitud.IdMenuNavigation.Descripcion,
                         FechaHoraSolicitud =
-                            solicitud.FechaHoraSolicitud
+                            solicitud.FechaHoraSolicitud,
+                        Entregada =
+                            solicitud.Entrega is not null,
+                        CantidadRepeticiones =
+                            solicitud.Entrega?.Repeticionentrega.Count ?? 0
                     })
                 .ToList();
 
             if (resultado.Solicitudes.Count == 0)
             {
-                bool tieneEntrega =
-                    solicitudes.Any(solicitud =>
-                        solicitud.Entrega is not null);
-
                 bool tieneCancelada =
                     solicitudes.Any(solicitud =>
                         solicitud.Estado ==
                         (sbyte)EstadoSolicitud.Cancelada);
 
-                if (tieneEntrega)
-                {
-                    resultado.MensajeBusqueda =
-                        "El usuario no tiene solicitudes pendientes; al menos una de sus comidas ya fue entregada.";
-                }
-                else if (tieneCancelada)
-                {
-                    resultado.MensajeBusqueda =
-                        "El usuario no tiene solicitudes pendientes; sus solicitudes se encuentran canceladas.";
-                }
-                else
-                {
-                    resultado.MensajeBusqueda =
-                        "El usuario no tiene solicitudes pendientes para hoy.";
-                }
+                resultado.MensajeBusqueda = tieneCancelada
+                    ? "El usuario no tiene solicitudes activas; sus solicitudes se encuentran canceladas."
+                    : "El usuario no tiene solicitudes para entregar hoy.";
             }
 
             return resultado;
@@ -208,7 +201,7 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                 MetodoEntrega.Manual);
         }
 
-        public async Task<ResultadoOperacionDTO>
+        public async Task<ResultadoEscaneoEntregaDTO>
             RegistrarPorCodigoBarrasAsync(
                 string codigoBarras,
                 int idMenu,
@@ -216,7 +209,7 @@ namespace ComedorEstudiantil.Application.Services.Implementations
         {
             if (string.IsNullOrWhiteSpace(codigoBarras))
             {
-                return ResultadoOperacionDTO.Error(
+                return ErrorEscaneo(
                     "Debe escanear un código de barras.");
             }
 
@@ -226,7 +219,7 @@ namespace ComedorEstudiantil.Application.Services.Implementations
 
             if (menu is null)
             {
-                return ResultadoOperacionDTO.Error(
+                return ErrorEscaneo(
                     "El menú seleccionado no existe.");
             }
 
@@ -235,26 +228,26 @@ namespace ComedorEstudiantil.Application.Services.Implementations
 
             if (menu.Fecha != fechaActual)
             {
-                return ResultadoOperacionDTO.Error(
+                return ErrorEscaneo(
                     "Solo se pueden registrar entregas de los menús del día actual.");
             }
 
             if (!menu.Publicado)
             {
-                return ResultadoOperacionDTO.Error(
+                return ErrorEscaneo(
                     "El menú seleccionado no está publicado.");
             }
 
             if (menu.IdTipoComidaNavigation.Activo != true)
             {
-                return ResultadoOperacionDTO.Error(
+                return ErrorEscaneo(
                     "El tipo de comida seleccionado está inactivo.");
             }
 
             if (menu.IdActividadNavigation is not null &&
                 menu.IdActividadNavigation.Activo != true)
             {
-                return ResultadoOperacionDTO.Error(
+                return ErrorEscaneo(
                     "La actividad asociada con el menú está inactiva.");
             }
 
@@ -265,7 +258,7 @@ namespace ComedorEstudiantil.Application.Services.Implementations
 
             if (usuario is null)
             {
-                return ResultadoOperacionDTO.Error(
+                return ErrorEscaneo(
                     "No existe un usuario activo asociado con el código escaneado.");
             }
 
@@ -280,28 +273,92 @@ namespace ComedorEstudiantil.Application.Services.Implementations
 
             if (solicitud is null)
             {
-                return ResultadoOperacionDTO.Error(
+                return ErrorEscaneo(
                     $"{nombreCompleto}, cédula {usuario.Identificacion}, no ha realizado una solicitud para este menú.");
             }
 
             if (solicitud.Estado !=
                 (sbyte)EstadoSolicitud.Activa)
             {
-                return ResultadoOperacionDTO.Error(
+                return ErrorEscaneo(
                     $"La solicitud de {nombreCompleto}, cédula {usuario.Identificacion}, está cancelada.");
             }
 
-            if (solicitud.Entrega is not null ||
+            Entrega? entrega =
+                solicitud.Entrega ??
                 await _repositoryEntrega
                     .BuscarPorSolicitudAsync(
-                        solicitud.IdSolicitud) is not null)
+                        solicitud.IdSolicitud);
+
+            if (entrega is not null)
             {
-                return ResultadoOperacionDTO.Error(
-                    $"La comida de {nombreCompleto}, cédula {usuario.Identificacion}, ya fue entregada.");
+                return CrearConfirmacionRepeticion(
+                    entrega,
+                    usuario);
             }
 
-            return await RegistrarAsync(
-                solicitud,
+            ResultadoOperacionDTO resultado =
+                await RegistrarAsync(
+                    solicitud,
+                    idUsuarioFuncionario,
+                    MetodoEntrega.CodigoBarras);
+
+            return new ResultadoEscaneoEntregaDTO
+            {
+                Exitoso = resultado.Exitoso,
+                Mensaje = resultado.Mensaje
+            };
+        }
+        public async Task<ResultadoEscaneoEntregaDTO>
+    PrepararRepeticionManualAsync(
+        int idEntrega)
+        {
+            Entrega? entrega =
+                await _repositoryEntrega.BuscarPorIdAsync(
+                    idEntrega);
+
+            if (entrega is null)
+            {
+                return ErrorEscaneo(
+                    "La entrega original no existe.");
+            }
+
+            DateOnly fechaActual =
+                _fechaHoraService.ObtenerFechaActual();
+
+            if (entrega.IdSolicitudNavigation
+                    .IdMenuNavigation.Fecha != fechaActual)
+            {
+                return ErrorEscaneo(
+                    "La repetición solamente puede registrarse el día correspondiente al menú.");
+            }
+
+            Usuario usuario =
+                entrega.IdSolicitudNavigation
+                    .IdUsuarioNavigation;
+
+            return CrearConfirmacionRepeticion(
+                entrega,
+                usuario);
+        }
+        public async Task<ResultadoOperacionDTO>
+            RegistrarRepeticionManualAsync(
+                int idEntrega,
+                int idUsuarioFuncionario)
+        {
+            return await RegistrarRepeticionAsync(
+                idEntrega,
+                idUsuarioFuncionario,
+                MetodoEntrega.Manual);
+        }
+
+        public async Task<ResultadoOperacionDTO>
+            RegistrarRepeticionCodigoBarrasAsync(
+                int idEntrega,
+                int idUsuarioFuncionario)
+        {
+            return await RegistrarRepeticionAsync(
+                idEntrega,
                 idUsuarioFuncionario,
                 MetodoEntrega.CodigoBarras);
         }
@@ -359,6 +416,119 @@ namespace ComedorEstudiantil.Application.Services.Implementations
 
             return ResultadoOperacionDTO.Correcto(
                 $"La entrega de {usuario.Nombre} {usuario.Apellidos}, cédula {usuario.Identificacion}, se realizó correctamente.");
+        }
+
+        private async Task<ResultadoOperacionDTO>
+            RegistrarRepeticionAsync(
+                int idEntrega,
+                int idUsuarioFuncionario,
+                MetodoEntrega metodoRegistro)
+        {
+            Entrega? entrega =
+                await _repositoryEntrega.BuscarPorIdAsync(
+                    idEntrega);
+
+            if (entrega is null)
+            {
+                return ResultadoOperacionDTO.Error(
+                    "La entrega original no existe.");
+            }
+
+            DateTime ahora =
+                _fechaHoraService.ObtenerAhora();
+
+            DateOnly fechaActual =
+                DateOnly.FromDateTime(ahora);
+
+            if (entrega.IdSolicitudNavigation
+                    .IdMenuNavigation.Fecha != fechaActual)
+            {
+                return ResultadoOperacionDTO.Error(
+                    "La repetición solamente puede registrarse el día correspondiente al menú.");
+            }
+
+            bool repeticionReciente =
+                await _repositoryRepeticionEntrega
+                    .ExisteRepeticionRecienteAsync(
+                        idEntrega,
+                        ahora.AddSeconds(-5));
+
+            if (repeticionReciente)
+            {
+                return ResultadoOperacionDTO.Error(
+                    "Ya se registró una repetición para este usuario hace pocos segundos.");
+            }
+
+            var repeticion =
+                new Repeticionentrega
+                {
+                    IdEntrega =
+                        idEntrega,
+                    FechaHoraRepeticion =
+                        ahora,
+                    IdUsuarioRegistro =
+                        idUsuarioFuncionario,
+                    MetodoRegistro =
+                        (sbyte)metodoRegistro
+                };
+
+            await _repositoryRepeticionEntrega
+                .AgregarAsync(repeticion);
+
+            Usuario usuario =
+                entrega.IdSolicitudNavigation
+                    .IdUsuarioNavigation;
+
+            return ResultadoOperacionDTO.Correcto(
+                $"La repetición de {usuario.Nombre} {usuario.Apellidos}, cédula {usuario.Identificacion}, se registró correctamente.");
+        }
+        private static ResultadoEscaneoEntregaDTO
+    CrearConfirmacionRepeticion(
+        Entrega entrega,
+        Usuario usuario)
+        {
+            int cantidadRepeticiones =
+                entrega.Repeticionentrega.Count;
+
+            string descripcionCantidad =
+                cantidadRepeticiones switch
+                {
+                    0 =>
+                        "ya recibió su comida y todavía no ha repetido",
+                    1 =>
+                        "ya recibió su comida y ha repetido 1 vez",
+                    _ =>
+                        $"ya recibió su comida y ha repetido {cantidadRepeticiones} veces"
+                };
+
+            int siguienteRepeticion =
+                cantidadRepeticiones + 1;
+
+            string nombreCompleto =
+                $"{usuario.Nombre} {usuario.Apellidos}";
+
+            return new ResultadoEscaneoEntregaDTO
+            {
+                Exitoso = false,
+                Mensaje =
+                    $"{nombreCompleto}, cédula {usuario.Identificacion}, {descripcionCantidad}. ¿Desea permitir la repetición número {siguienteRepeticion}?",
+                RequiereConfirmarRepeticion = true,
+                IdEntrega = entrega.IdEntrega,
+                NombreUsuario = nombreCompleto,
+                Identificacion = usuario.Identificacion,
+                CantidadRepeticiones =
+                    cantidadRepeticiones
+            };
+        }
+
+        private static ResultadoEscaneoEntregaDTO ErrorEscaneo(
+            string mensaje)
+        {
+            return new ResultadoEscaneoEntregaDTO
+            {
+                Exitoso = false,
+                Mensaje = mensaje
+            };
         }
 
         private static string ObtenerNombreMetodo(

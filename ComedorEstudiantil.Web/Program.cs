@@ -98,6 +98,7 @@ builder.Services.AddScoped<IRepositorySolicitud, RepositorySolicitud>();
 builder.Services.AddScoped<IRepositoryEntrega, RepositoryEntrega>();
 builder.Services.AddScoped<IRepositoryReporte, RepositoryReporte>();
 builder.Services.AddScoped<IRepositoryBitacora, RepositoryBitacora>();
+builder.Services.AddScoped<IRepositoryRepeticionEntrega,RepositoryRepeticionEntrega>();
 
 builder.Services.AddScoped<IServiceBitacora, ServiceBitacora>();
 builder.Services.AddScoped<IServiceReporte, ServiceReporte>();
