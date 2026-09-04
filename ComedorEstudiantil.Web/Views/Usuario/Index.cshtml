@@ -55,6 +55,7 @@
                     <thead>
                         <tr>
                             <th>Identificación</th>
+                            <th>Código de barras</th>
                             <th>Nombre</th>
                             <th>Correo</th>
                             <th>Rol</th>
@@ -63,12 +64,28 @@
                             <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         @foreach (var usuario in Model)
                         {
                             <tr>
                                 <td>@usuario.Identificacion</td>
+                                <td>
+                                    <a asp-controller="Usuario"
+                                       asp-action="CodigoBarras"
+                                       asp-route-id="@usuario.IdUsuario"
+                                       class="text-decoration-none">
+                                        <img src="@Url.Action(
+                  "ImagenCodigoBarras",
+                  "Usuario",
+                  new { id = usuario.IdUsuario })"
+                                             alt="Código de barras de @usuario.NombreCompleto"
+                                             style="width: 220px; height: 60px; object-fit: contain;" />
+
+                                        <div class="text-center">
+                                            <code>@usuario.CodigoBarras</code>
+                                        </div>
+                                    </a>
+                                </td>
                                 <td>@usuario.NombreCompleto</td>
                                 <td>@usuario.Correo</td>
                                 <td>@usuario.Rol</td>
@@ -153,7 +170,7 @@
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="7"
+                                <td colspan="8"
                                     class="text-center text-muted py-4">
                                     No existen usuarios registrados.
                                 </td>

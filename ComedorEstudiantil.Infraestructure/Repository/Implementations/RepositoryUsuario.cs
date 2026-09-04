@@ -46,6 +46,17 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
                     usuario.Activo == true);
         }
 
+        public async Task<Usuario?> BuscarPorCodigoBarrasAsync(
+            string codigoBarras)
+        {
+            return await _context.Set<Usuario>()
+                .AsNoTracking()
+                .Include(usuario => usuario.IdRolNavigation)
+                .FirstOrDefaultAsync(usuario =>
+                    usuario.CodigoBarras == codigoBarras &&
+                    usuario.Activo == true);
+        }
+
         public async Task<Usuario?> BuscarPorIdAsync(int idUsuario)
         {
             return await _context.Set<Usuario>()
@@ -93,6 +104,14 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
                      usuario.IdUsuario != idUsuarioExcluir.Value));
         }
 
+        public async Task<bool> ExisteCodigoBarrasAsync(
+            string codigoBarras)
+        {
+            return await _context.Set<Usuario>()
+                .AnyAsync(usuario =>
+                    usuario.CodigoBarras == codigoBarras);
+        }
+
         public async Task AgregarAsync(Usuario usuario)
         {
             await _context.Set<Usuario>().AddAsync(usuario);
@@ -105,11 +124,12 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
         }
 
         public async Task ActualizarHashContrasenaAsync(
-    int idUsuario,
-    string contrasenaHash)
+            int idUsuario,
+            string contrasenaHash)
         {
             await _context.Set<Usuario>()
-                .Where(usuario => usuario.IdUsuario == idUsuario)
+                .Where(usuario =>
+                    usuario.IdUsuario == idUsuario)
                 .ExecuteUpdateAsync(actualizacion =>
                     actualizacion.SetProperty(
                         usuario => usuario.ContrasenaHash,
@@ -123,20 +143,23 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
             DateTime fechaCambio)
         {
             await _context.Set<Usuario>()
-                .Where(usuario => usuario.IdUsuario == idUsuario)
-                .ExecuteUpdateAsync(actualizacion => actualizacion
-                    .SetProperty(
-                        usuario => usuario.ContrasenaHash,
-                        contrasenaHash)
-                    .SetProperty(
-                        usuario => usuario.DebeCambiarContrasena,
-                        debeCambiarContrasena)
-                    .SetProperty(
-                        usuario => usuario.FechaUltimoCambioContrasena,
-                        fechaCambio));
+                .Where(usuario =>
+                    usuario.IdUsuario == idUsuario)
+                .ExecuteUpdateAsync(actualizacion =>
+                    actualizacion
+                        .SetProperty(
+                            usuario => usuario.ContrasenaHash,
+                            contrasenaHash)
+                        .SetProperty(
+                            usuario => usuario.DebeCambiarContrasena,
+                            debeCambiarContrasena)
+                        .SetProperty(
+                            usuario => usuario.FechaUltimoCambioContrasena,
+                            fechaCambio));
         }
 
-        public void EliminarEstudiante(Estudiante estudiante)
+        public void EliminarEstudiante(
+            Estudiante estudiante)
         {
             _context.Set<Estudiante>().Remove(estudiante);
         }

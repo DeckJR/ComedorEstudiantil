@@ -85,6 +85,7 @@ builder.Services.AddDbContext<ComedorEstudiantilContext>(options =>
 
 builder.Services.AddSingleton<IFechaHoraService,FechaHoraService>();
 builder.Services.AddSingleton<IReportePdfService, ReportePdfService>();
+builder.Services.AddSingleton<ICodigoBarrasService,CodigoBarrasService>();
 
 builder.Services.AddScoped<IRepositoryUsuario,RepositoryUsuario>();
 builder.Services.AddScoped<IRepositoryRol, RepositoryRol>();

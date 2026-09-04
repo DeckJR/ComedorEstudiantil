@@ -1,0 +1,86 @@
+﻿@model ComedorEstudiantil.Application.DTOs.CodigoBarrasUsuarioDTO
+
+@{
+    ViewData["Title"] = "Código de barras";
+}
+
+<style>
+    .tarjeta-codigo {
+        width: 560px;
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 30px;
+        border: 2px solid #212529;
+        border-radius: 12px;
+        background-color: #ffffff;
+        text-align: center;
+    }
+
+    .imagen-codigo {
+        width: 500px;
+        max-width: 100%;
+        height: auto;
+    }
+
+    @@media print {
+        header,
+        footer,
+        .acciones-no-imprimir {
+            display: none !important;
+        }
+
+        body {
+            background-color: #ffffff;
+        }
+
+        .container {
+            max-width: none;
+        }
+
+        .tarjeta-codigo {
+            border: 1px solid #000000;
+            box-shadow: none !important;
+        }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="tarjeta-codigo shadow-sm">
+        <h1 class="h4 mb-3">
+            Comedor Estudiantil
+        </h1>
+
+        <div class="fw-bold fs-5">
+            @Model.NombreCompleto
+        </div>
+
+        <div class="mb-3">
+            Cédula: @Model.Identificacion
+        </div>
+
+        <img src="@Url.Action(
+                  "ImagenCodigoBarras",
+                  "Usuario",
+                  new { id = Model.IdUsuario })"
+             alt="Código de barras de @Model.NombreCompleto"
+             class="imagen-codigo" />
+
+        <div class="font-monospace fw-bold mt-2">
+            @Model.CodigoBarras
+        </div>
+    </div>
+
+    <div class="acciones-no-imprimir d-flex justify-content-center gap-2 mt-4">
+        <button type="button"
+                class="btn btn-primary"
+                onclick="window.print();">
+            Imprimir
+        </button>
+
+        <a asp-controller="Usuario"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+    </div>
+</div>

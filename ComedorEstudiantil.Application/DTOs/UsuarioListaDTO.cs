@@ -10,6 +10,7 @@ namespace ComedorEstudiantil.Application.DTOs
     {
         public int IdUsuario { get; set; }
         public string Identificacion { get; set; } = string.Empty;
+        public string CodigoBarras { get; set; } = string.Empty;
         public string NombreCompleto { get; set; } = string.Empty;
         public string Correo { get; set; } = string.Empty;
         public string Rol { get; set; } = string.Empty;

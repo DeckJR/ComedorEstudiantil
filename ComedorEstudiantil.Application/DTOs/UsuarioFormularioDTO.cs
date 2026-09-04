@@ -24,6 +24,9 @@ namespace ComedorEstudiantil.Application.DTOs
         [Display(Name = "Identificación")]
         public string Identificacion { get; set; } = string.Empty;
 
+        [Display(Name = "Código de barras")]
+        public string? CodigoBarras { get; set; }
+
         [Required(ErrorMessage = "El correo es obligatorio.")]
         [EmailAddress(ErrorMessage = "El correo no tiene un formato válido.")]
         [StringLength(150, ErrorMessage = "El correo no puede superar los 150 caracteres.")]
@@ -48,10 +51,6 @@ namespace ComedorEstudiantil.Application.DTOs
 
         [Display(Name = "Grado y sección")]
         public int? IdGradoSeccion { get; set; }
-
-        [StringLength(50, ErrorMessage = "El código de acceso no puede superar los 50 caracteres.")]
-        [Display(Name = "Código de acceso")]
-        public string? CodigoAcceso { get; set; }
 
         [Range(2000, 2100, ErrorMessage = "El año de ingreso no es válido.")]
         [Display(Name = "Año de ingreso")]

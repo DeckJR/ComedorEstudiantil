@@ -11,6 +11,7 @@
     <PackageReference Include="QuestPDF" Version="2026.8.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="ZXing.Net.Bindings.SkiaSharp" Version="0.16.22" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2,6 +2,7 @@
 using ComedorEstudiantil.Application.DTOs;
 using ComedorEstudiantil.Application.Services.Interfaces;
 using ComedorEstudiantil.Web.Authorization;
+using ComedorEstudiantil.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,13 +12,16 @@ namespace ComedorEstudiantil.Web.Controllers
     public class UsuarioController : Controller
     {
         private readonly IServiceUsuario _serviceUsuario;
+        private readonly ICodigoBarrasService _codigoBarrasService;
         private readonly ILogger<UsuarioController> _logger;
 
         public UsuarioController(
             IServiceUsuario serviceUsuario,
+            ICodigoBarrasService codigoBarrasService,
             ILogger<UsuarioController> logger)
         {
             _serviceUsuario = serviceUsuario;
+            _codigoBarrasService = codigoBarrasService;
             _logger = logger;
         }
 
@@ -28,6 +32,38 @@ namespace ComedorEstudiantil.Web.Controllers
                 await _serviceUsuario.ListarAsync();
 
             return View(usuarios);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CodigoBarras(int id)
+        {
+            CodigoBarrasUsuarioDTO? usuario =
+                await _serviceUsuario.ObtenerCodigoBarrasAsync(id);
+
+            if (usuario is null)
+            {
+                return NotFound();
+            }
+
+            return View(usuario);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ImagenCodigoBarras(int id)
+        {
+            CodigoBarrasUsuarioDTO? usuario =
+                await _serviceUsuario.ObtenerCodigoBarrasAsync(id);
+
+            if (usuario is null)
+            {
+                return NotFound();
+            }
+
+            byte[] imagen =
+                _codigoBarrasService.GenerarPng(
+                    usuario.CodigoBarras);
+
+            return File(imagen, "image/png");
         }
 
         [HttpGet]
@@ -71,7 +107,8 @@ namespace ComedorEstudiantil.Web.Controllers
                 ObtenerIdUsuarioActual(),
                 formulario.Identificacion);
 
-            TempData["MensajeExito"] = resultado.Mensaje;
+            TempData["MensajeExito"] =
+                resultado.Mensaje;
 
             return RedirectToAction(nameof(Index));
         }
@@ -123,7 +160,8 @@ namespace ComedorEstudiantil.Web.Controllers
                 ObtenerIdUsuarioActual(),
                 formulario.IdUsuario);
 
-            TempData["MensajeExito"] = resultado.Mensaje;
+            TempData["MensajeExito"] =
+                resultado.Mensaje;
 
             return RedirectToAction(nameof(Index));
         }
@@ -145,23 +183,27 @@ namespace ComedorEstudiantil.Web.Controllers
                     ObtenerIdUsuarioActual(),
                     id);
 
-                TempData["MensajeExito"] = resultado.Mensaje;
+                TempData["MensajeExito"] =
+                    resultado.Mensaje;
             }
             else
             {
-                TempData["MensajeError"] = resultado.Mensaje;
+                TempData["MensajeError"] =
+                    resultado.Mensaje;
             }
 
             return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
-        public async Task<IActionResult> RestablecerContrasena(int id)
+        public async Task<IActionResult> RestablecerContrasena(
+            int id)
         {
             RestablecerContrasenaDTO? formulario =
-                await _serviceUsuario.PrepararRestablecimientoAsync(
-                    id,
-                    PuedeAsignarAdministrador());
+                await _serviceUsuario
+                    .PrepararRestablecimientoAsync(
+                        id,
+                        PuedeAsignarAdministrador());
 
             if (formulario is null)
             {
@@ -182,9 +224,10 @@ namespace ComedorEstudiantil.Web.Controllers
             }
 
             ResultadoOperacionDTO resultado =
-                await _serviceUsuario.RestablecerContrasenaAsync(
-                    formulario,
-                    PuedeAsignarAdministrador());
+                await _serviceUsuario
+                    .RestablecerContrasenaAsync(
+                        formulario,
+                        PuedeAsignarAdministrador());
 
             if (!resultado.Exitoso)
             {
@@ -200,7 +243,8 @@ namespace ComedorEstudiantil.Web.Controllers
                 ObtenerIdUsuarioActual(),
                 formulario.IdUsuario);
 
-            TempData["MensajeExito"] = resultado.Mensaje;
+            TempData["MensajeExito"] =
+                resultado.Mensaje;
 
             return RedirectToAction(nameof(Index));
         }
@@ -212,8 +256,9 @@ namespace ComedorEstudiantil.Web.Controllers
 
         private int ObtenerIdUsuarioActual()
         {
-            string? valor = User.FindFirstValue(
-                ClaimTypes.NameIdentifier);
+            string? valor =
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
 
             if (!int.TryParse(valor, out int idUsuario))
             {

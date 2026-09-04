@@ -10,6 +10,7 @@ namespace ComedorEstudiantil.Application.Services.Implementations
     {
         private const string RolAdministrador = "Administrador";
         private const string RolEstudiante = "Estudiante";
+        private const int IntentosGeneracionCodigo = 10;
 
         private readonly IRepositoryUsuario _repositoryUsuario;
         private readonly IRepositoryRol _repositoryRol;
@@ -33,25 +34,54 @@ namespace ComedorEstudiantil.Application.Services.Implementations
 
         public async Task<List<UsuarioListaDTO>> ListarAsync()
         {
-            List<Usuario> usuarios = await _repositoryUsuario.ListarAsync();
+            List<Usuario> usuarios =
+                await _repositoryUsuario.ListarAsync();
 
-            return usuarios.Select(usuario => new UsuarioListaDTO
-            {
-                IdUsuario = usuario.IdUsuario,
-                Identificacion = usuario.Identificacion,
-                NombreCompleto = $"{usuario.Nombre} {usuario.Apellidos}",
-                Correo = usuario.Correo,
-                Rol = usuario.IdRolNavigation.Nombre,
-                Activo = usuario.Activo == true,
-                TipoBeneficiario = usuario.Estudiante?
-                    .IdTipoBeneficiarioNavigation.Nombre,
-                GradoSeccion = usuario.Estudiante?
-                    .IdGradoSeccionNavigation is null
-                        ? null
-                        : $"{usuario.Estudiante.IdGradoSeccionNavigation.Grado}-{usuario.Estudiante.IdGradoSeccionNavigation.Seccion}"
-            }).ToList();
+            return usuarios.Select(usuario =>
+                new UsuarioListaDTO
+                {
+                    IdUsuario = usuario.IdUsuario,
+                    Identificacion = usuario.Identificacion,
+                    CodigoBarras = usuario.CodigoBarras,
+                    NombreCompleto =
+                        $"{usuario.Nombre} {usuario.Apellidos}",
+                    Correo = usuario.Correo,
+                    Rol = usuario.IdRolNavigation.Nombre,
+                    Activo = usuario.Activo == true,
+                    TipoBeneficiario = usuario.Estudiante?
+                        .IdTipoBeneficiarioNavigation.Nombre,
+                    GradoSeccion = usuario.Estudiante?
+                        .IdGradoSeccionNavigation is null
+                            ? null
+                            : $"{usuario.Estudiante.IdGradoSeccionNavigation.Grado}-{usuario.Estudiante.IdGradoSeccionNavigation.Seccion}"
+                })
+                .ToList();
         }
 
+        public async Task<CodigoBarrasUsuarioDTO?>
+    ObtenerCodigoBarrasAsync(
+        int idUsuario)
+        {
+            Usuario? usuario =
+                await _repositoryUsuario.BuscarPorIdAsync(
+                    idUsuario);
+
+            if (usuario is null)
+            {
+                return null;
+            }
+
+            return new CodigoBarrasUsuarioDTO
+            {
+                IdUsuario = usuario.IdUsuario,
+                NombreCompleto =
+                    $"{usuario.Nombre} {usuario.Apellidos}",
+                Identificacion =
+                    usuario.Identificacion,
+                CodigoBarras =
+                    usuario.CodigoBarras
+            };
+        }
         public async Task<UsuarioFormularioDTO> PrepararNuevoAsync(
             bool puedeAsignarAdministrador)
         {
@@ -72,15 +102,17 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             int idUsuario,
             bool puedeAsignarAdministrador)
         {
-            Usuario? usuario = await _repositoryUsuario
-                .BuscarPorIdAsync(idUsuario);
+            Usuario? usuario =
+                await _repositoryUsuario.BuscarPorIdAsync(
+                    idUsuario);
 
             if (usuario is null)
             {
                 return null;
             }
 
-            if (usuario.IdRolNavigation.Nombre == RolAdministrador &&
+            if (usuario.IdRolNavigation.Nombre ==
+                    RolAdministrador &&
                 !puedeAsignarAdministrador)
             {
                 return null;
@@ -92,6 +124,7 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                 Nombre = usuario.Nombre,
                 Apellidos = usuario.Apellidos,
                 Identificacion = usuario.Identificacion,
+                CodigoBarras = usuario.CodigoBarras,
                 Correo = usuario.Correo,
                 IdRol = usuario.IdRol,
                 Activo = usuario.Activo == true,
@@ -99,8 +132,6 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                     .IdTipoBeneficiario,
                 IdGradoSeccion = usuario.Estudiante?
                     .IdGradoSeccion,
-                CodigoAcceso = usuario.Estudiante?
-                    .CodigoAcceso,
                 AnioIngreso = usuario.Estudiante?
                     .AnioIngreso
             };
@@ -116,39 +147,50 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             UsuarioFormularioDTO formulario,
             bool puedeAsignarAdministrador)
         {
-            Rol? rol = await _repositoryRol.BuscarPorIdAsync(
-                formulario.IdRol);
+            Rol? rol =
+                await _repositoryRol.BuscarPorIdAsync(
+                    formulario.IdRol);
 
-            ResultadoOperacionDTO? validacion = await ValidarFormularioAsync(
-                formulario,
-                rol,
-                null,
-                puedeAsignarAdministrador,
-                true);
+            ResultadoOperacionDTO? validacion =
+                await ValidarFormularioAsync(
+                    formulario,
+                    rol,
+                    null,
+                    puedeAsignarAdministrador,
+                    true);
 
             if (validacion is not null)
             {
                 return validacion;
             }
 
+            string codigoBarras =
+                await GenerarCodigoBarrasUnicoAsync();
+
             var usuario = new Usuario
             {
                 Nombre = formulario.Nombre.Trim(),
                 Apellidos = formulario.Apellidos.Trim(),
-                Identificacion = formulario.Identificacion.Trim(),
-                Correo = formulario.Correo.Trim().ToLowerInvariant(),
+                Identificacion =
+                    formulario.Identificacion.Trim(),
+                CodigoBarras = codigoBarras,
+                Correo = formulario.Correo
+                    .Trim()
+                    .ToLowerInvariant(),
                 IdRol = formulario.IdRol,
                 Activo = formulario.Activo,
                 FechaCreacion = DateTime.Now
             };
 
-            usuario.ContrasenaHash = _passwordHasher.HashPassword(
-                usuario,
-                formulario.Contrasena!);
+            usuario.ContrasenaHash =
+                _passwordHasher.HashPassword(
+                    usuario,
+                    formulario.Contrasena!);
 
             if (rol!.Nombre == RolEstudiante)
             {
-                usuario.Estudiante = CrearEstudiante(formulario);
+                usuario.Estudiante =
+                    CrearEstudiante(formulario);
             }
 
             await _repositoryUsuario.AgregarAsync(usuario);
@@ -161,8 +203,10 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             UsuarioFormularioDTO formulario,
             bool puedeAsignarAdministrador)
         {
-            Usuario? usuario = await _repositoryUsuario
-                .BuscarPorIdParaEdicionAsync(formulario.IdUsuario);
+            Usuario? usuario =
+                await _repositoryUsuario
+                    .BuscarPorIdParaEdicionAsync(
+                        formulario.IdUsuario);
 
             if (usuario is null)
             {
@@ -170,22 +214,25 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                     "El usuario solicitado no existe.");
             }
 
-            if (usuario.IdRolNavigation.Nombre == RolAdministrador &&
+            if (usuario.IdRolNavigation.Nombre ==
+                    RolAdministrador &&
                 !puedeAsignarAdministrador)
             {
                 return ResultadoOperacionDTO.Error(
                     "No tiene permisos para modificar administradores.");
             }
 
-            Rol? rol = await _repositoryRol.BuscarPorIdAsync(
-                formulario.IdRol);
+            Rol? rol =
+                await _repositoryRol.BuscarPorIdAsync(
+                    formulario.IdRol);
 
-            ResultadoOperacionDTO? validacion = await ValidarFormularioAsync(
-                formulario,
-                rol,
-                usuario.IdUsuario,
-                puedeAsignarAdministrador,
-                false);
+            ResultadoOperacionDTO? validacion =
+                await ValidarFormularioAsync(
+                    formulario,
+                    rol,
+                    usuario.IdUsuario,
+                    puedeAsignarAdministrador,
+                    false);
 
             if (validacion is not null)
             {
@@ -193,24 +240,31 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             }
 
             usuario.Nombre = formulario.Nombre.Trim();
-            usuario.Apellidos = formulario.Apellidos.Trim();
-            usuario.Identificacion = formulario.Identificacion.Trim();
-            usuario.Correo = formulario.Correo.Trim().ToLowerInvariant();
+            usuario.Apellidos =
+                formulario.Apellidos.Trim();
+            usuario.Identificacion =
+                formulario.Identificacion.Trim();
+            usuario.Correo = formulario.Correo
+                .Trim()
+                .ToLowerInvariant();
             usuario.IdRol = formulario.IdRol;
             usuario.Activo = formulario.Activo;
 
-            if (!string.IsNullOrWhiteSpace(formulario.Contrasena))
+            if (!string.IsNullOrWhiteSpace(
+                formulario.Contrasena))
             {
-                usuario.ContrasenaHash = _passwordHasher.HashPassword(
-                    usuario,
-                    formulario.Contrasena);
+                usuario.ContrasenaHash =
+                    _passwordHasher.HashPassword(
+                        usuario,
+                        formulario.Contrasena);
             }
 
             if (rol!.Nombre == RolEstudiante)
             {
                 if (usuario.Estudiante is null)
                 {
-                    usuario.Estudiante = CrearEstudiante(formulario);
+                    usuario.Estudiante =
+                        CrearEstudiante(formulario);
                 }
                 else
                 {
@@ -244,8 +298,10 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                     "No puede desactivar su propio usuario.");
             }
 
-            Usuario? usuario = await _repositoryUsuario
-                .BuscarPorIdParaEdicionAsync(idUsuario);
+            Usuario? usuario =
+                await _repositoryUsuario
+                    .BuscarPorIdParaEdicionAsync(
+                        idUsuario);
 
             if (usuario is null)
             {
@@ -253,19 +309,23 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                     "El usuario solicitado no existe.");
             }
 
-            if (usuario.IdRolNavigation.Nombre == RolAdministrador &&
+            if (usuario.IdRolNavigation.Nombre ==
+                    RolAdministrador &&
                 !esAdministradorActual)
             {
                 return ResultadoOperacionDTO.Error(
                     "No tiene permisos para modificar administradores.");
             }
 
-            bool nuevoEstado = usuario.Activo != true;
+            bool nuevoEstado =
+                usuario.Activo != true;
+
             usuario.Activo = nuevoEstado;
 
             if (usuario.Estudiante is not null)
             {
-                usuario.Estudiante.Activo = nuevoEstado;
+                usuario.Estudiante.Activo =
+                    nuevoEstado;
             }
 
             await _repositoryUsuario.GuardarCambiosAsync();
@@ -274,22 +334,26 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                 ? "El usuario fue activado correctamente."
                 : "El usuario fue desactivado correctamente.";
 
-            return ResultadoOperacionDTO.Correcto(mensaje);
+            return ResultadoOperacionDTO.Correcto(
+                mensaje);
         }
 
-        public async Task<RestablecerContrasenaDTO?> PrepararRestablecimientoAsync(
-            int idUsuario,
-            bool esAdministradorActual)
+        public async Task<RestablecerContrasenaDTO?>
+            PrepararRestablecimientoAsync(
+                int idUsuario,
+                bool esAdministradorActual)
         {
-            Usuario? usuario = await _repositoryUsuario
-                .BuscarPorIdAsync(idUsuario);
+            Usuario? usuario =
+                await _repositoryUsuario.BuscarPorIdAsync(
+                    idUsuario);
 
             if (usuario is null)
             {
                 return null;
             }
 
-            if (usuario.IdRolNavigation.Nombre == RolAdministrador &&
+            if (usuario.IdRolNavigation.Nombre ==
+                    RolAdministrador &&
                 !esAdministradorActual)
             {
                 return null;
@@ -303,12 +367,14 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             };
         }
 
-        public async Task<ResultadoOperacionDTO> RestablecerContrasenaAsync(
-            RestablecerContrasenaDTO formulario,
-            bool esAdministradorActual)
+        public async Task<ResultadoOperacionDTO>
+            RestablecerContrasenaAsync(
+                RestablecerContrasenaDTO formulario,
+                bool esAdministradorActual)
         {
-            Usuario? usuario = await _repositoryUsuario
-                .BuscarPorIdAsync(formulario.IdUsuario);
+            Usuario? usuario =
+                await _repositoryUsuario.BuscarPorIdAsync(
+                    formulario.IdUsuario);
 
             if (usuario is null)
             {
@@ -316,22 +382,25 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                     "El usuario solicitado no existe.");
             }
 
-            if (usuario.IdRolNavigation.Nombre == RolAdministrador &&
+            if (usuario.IdRolNavigation.Nombre ==
+                    RolAdministrador &&
                 !esAdministradorActual)
             {
                 return ResultadoOperacionDTO.Error(
                     "No tiene permisos para modificar administradores.");
             }
 
-            string contrasenaHash = _passwordHasher.HashPassword(
-                usuario,
-                formulario.NuevaContrasena);
+            string contrasenaHash =
+                _passwordHasher.HashPassword(
+                    usuario,
+                    formulario.NuevaContrasena);
 
-            await _repositoryUsuario.EstablecerContrasenaAsync(
-    usuario.IdUsuario,
-    contrasenaHash,
-    true,
-    DateTime.Now);
+            await _repositoryUsuario
+                .EstablecerContrasenaAsync(
+                    usuario.IdUsuario,
+                    contrasenaHash,
+                    true,
+                    DateTime.Now);
 
             return ResultadoOperacionDTO.Correcto(
                 "La contraseña fue restablecida correctamente.");
@@ -341,9 +410,12 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             UsuarioFormularioDTO formulario,
             bool puedeAsignarAdministrador)
         {
-            List<Rol> roles = await _repositoryRol.ListarAsync();
-            Rol? rolEstudiante = roles.FirstOrDefault(
-                rol => rol.Nombre == RolEstudiante);
+            List<Rol> roles =
+                await _repositoryRol.ListarAsync();
+
+            Rol? rolEstudiante =
+                roles.FirstOrDefault(rol =>
+                    rol.Nombre == RolEstudiante);
 
             formulario.IdRolEstudiante =
                 rolEstudiante?.IdRol ?? 0;
@@ -352,38 +424,45 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                 .Where(rol =>
                     puedeAsignarAdministrador ||
                     rol.Nombre != RolAdministrador)
-                .Select(rol => new CatalogoDTO
-                {
-                    Id = rol.IdRol,
-                    Nombre = rol.Nombre
-                })
+                .Select(rol =>
+                    new CatalogoDTO
+                    {
+                        Id = rol.IdRol,
+                        Nombre = rol.Nombre
+                    })
                 .ToList();
 
             formulario.TiposBeneficiario =
-                (await _repositoryTipoBeneficiario.ListarAsync())
-                .Select(tipo => new CatalogoDTO
-                {
-                    Id = tipo.IdTipoBeneficiario,
-                    Nombre = tipo.Nombre
-                })
+                (await _repositoryTipoBeneficiario
+                    .ListarAsync())
+                .Select(tipo =>
+                    new CatalogoDTO
+                    {
+                        Id = tipo.IdTipoBeneficiario,
+                        Nombre = tipo.Nombre
+                    })
                 .ToList();
 
             formulario.GradosSecciones =
-                (await _repositoryGradoSeccion.ListarAsync())
-                .Select(grado => new CatalogoDTO
-                {
-                    Id = grado.IdGradoSeccion,
-                    Nombre = $"{grado.Grado}-{grado.Seccion}"
-                })
+                (await _repositoryGradoSeccion
+                    .ListarAsync())
+                .Select(grado =>
+                    new CatalogoDTO
+                    {
+                        Id = grado.IdGradoSeccion,
+                        Nombre =
+                            $"{grado.Grado}-{grado.Seccion}"
+                    })
                 .ToList();
         }
 
-        private async Task<ResultadoOperacionDTO?> ValidarFormularioAsync(
-            UsuarioFormularioDTO formulario,
-            Rol? rol,
-            int? idUsuarioExcluir,
-            bool puedeAsignarAdministrador,
-            bool esCreacion)
+        private async Task<ResultadoOperacionDTO?>
+            ValidarFormularioAsync(
+                UsuarioFormularioDTO formulario,
+                Rol? rol,
+                int? idUsuarioExcluir,
+                bool puedeAsignarAdministrador,
+                bool esCreacion)
         {
             if (rol is null)
             {
@@ -399,23 +478,28 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             }
 
             if (esCreacion &&
-                string.IsNullOrWhiteSpace(formulario.Contrasena))
+                string.IsNullOrWhiteSpace(
+                    formulario.Contrasena))
             {
                 return ResultadoOperacionDTO.Error(
                     "La contraseña es obligatoria para crear el usuario.");
             }
 
-            if (await _repositoryUsuario.ExisteIdentificacionAsync(
-                formulario.Identificacion.Trim(),
-                idUsuarioExcluir))
+            if (await _repositoryUsuario
+                .ExisteIdentificacionAsync(
+                    formulario.Identificacion.Trim(),
+                    idUsuarioExcluir))
             {
                 return ResultadoOperacionDTO.Error(
                     "Ya existe un usuario con esa identificación.");
             }
 
-            if (await _repositoryUsuario.ExisteCorreoAsync(
-                formulario.Correo.Trim().ToLowerInvariant(),
-                idUsuarioExcluir))
+            if (await _repositoryUsuario
+                .ExisteCorreoAsync(
+                    formulario.Correo
+                        .Trim()
+                        .ToLowerInvariant(),
+                    idUsuarioExcluir))
             {
                 return ResultadoOperacionDTO.Error(
                     "Ya existe un usuario con ese correo.");
@@ -435,16 +519,18 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                         "Debe indicar el año de ingreso.");
                 }
 
-                if (!await _repositoryTipoBeneficiario.ExisteAsync(
-                    formulario.IdTipoBeneficiario.Value))
+                if (!await _repositoryTipoBeneficiario
+                    .ExisteAsync(
+                        formulario.IdTipoBeneficiario.Value))
                 {
                     return ResultadoOperacionDTO.Error(
                         "El tipo de beneficiario seleccionado no existe.");
                 }
 
                 if (formulario.IdGradoSeccion.HasValue &&
-                    !await _repositoryGradoSeccion.ExisteAsync(
-                        formulario.IdGradoSeccion.Value))
+                    !await _repositoryGradoSeccion
+                        .ExisteAsync(
+                            formulario.IdGradoSeccion.Value))
                 {
                     return ResultadoOperacionDTO.Error(
                         "El grado y sección seleccionados no existen.");
@@ -454,6 +540,31 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             return null;
         }
 
+        private async Task<string>
+            GenerarCodigoBarrasUnicoAsync()
+        {
+            for (int intento = 0;
+                intento < IntentosGeneracionCodigo;
+                intento++)
+            {
+                string codigo =
+                    $"CE{Guid.NewGuid():N}"[..18]
+                    .ToUpperInvariant();
+
+                bool existe =
+                    await _repositoryUsuario
+                        .ExisteCodigoBarrasAsync(codigo);
+
+                if (!existe)
+                {
+                    return codigo;
+                }
+            }
+
+            throw new InvalidOperationException(
+                "No fue posible generar un código de barras único.");
+        }
+
         private static Estudiante CrearEstudiante(
             UsuarioFormularioDTO formulario)
         {
@@ -461,11 +572,12 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             {
                 IdTipoBeneficiario =
                     formulario.IdTipoBeneficiario!.Value,
-                IdGradoSeccion = formulario.IdGradoSeccion,
-                CodigoAcceso = LimpiarTextoOpcional(
-                    formulario.CodigoAcceso),
-                AnioIngreso = formulario.AnioIngreso!.Value,
-                Activo = formulario.Activo
+                IdGradoSeccion =
+                    formulario.IdGradoSeccion,
+                AnioIngreso =
+                    formulario.AnioIngreso!.Value,
+                Activo =
+                    formulario.Activo
             };
         }
 
@@ -477,18 +589,10 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                 formulario.IdTipoBeneficiario!.Value;
             estudiante.IdGradoSeccion =
                 formulario.IdGradoSeccion;
-            estudiante.CodigoAcceso = LimpiarTextoOpcional(
-                formulario.CodigoAcceso);
             estudiante.AnioIngreso =
                 formulario.AnioIngreso!.Value;
-            estudiante.Activo = formulario.Activo;
-        }
-
-        private static string? LimpiarTextoOpcional(string? texto)
-        {
-            return string.IsNullOrWhiteSpace(texto)
-                ? null
-                : texto.Trim();
+            estudiante.Activo =
+                formulario.Activo;
         }
     }
 }
