@@ -39,13 +39,11 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
                 .ToListAsync();
         }
 
-        public async Task<List<Solicitud>>
-            ListarPorUsuarioYMenusAsync(
-                int idUsuario,
-                List<int> idsMenus)
+        public async Task<List<Solicitud>> ListarPorUsuarioYMenusAsync(
+    int idUsuario,
+    List<int> idsMenus)
         {
             return await _context.Set<Solicitud>()
-                .AsNoTracking()
                 .Where(solicitud =>
                     solicitud.IdUsuario == idUsuario &&
                     idsMenus.Contains(solicitud.IdMenu))
@@ -103,11 +101,10 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
         }
 
         public async Task<Solicitud?> BuscarPorUsuarioYMenuAsync(
-            int idUsuario,
-            int idMenu)
+    int idUsuario,
+    int idMenu)
         {
             return await _context.Set<Solicitud>()
-                .AsNoTracking()
                 .Include(solicitud =>
                     solicitud.IdUsuarioNavigation)
                 .Include(solicitud =>
@@ -161,6 +158,32 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
                     solicitud.Entrega)
                 .FirstOrDefaultAsync(solicitud =>
                     solicitud.IdSolicitud == idSolicitud);
+        }
+
+        public async Task<bool> ReactivarAsync(
+    int idSolicitud,
+    DateTime fechaHoraSolicitud,
+    sbyte metodoMarcado,
+    int? idUsuarioMarco)
+        {
+            int filasAfectadas = await _context.Set<Solicitud>()
+                .Where(solicitud =>
+                    solicitud.IdSolicitud == idSolicitud)
+                .ExecuteUpdateAsync(actualizacion => actualizacion
+                    .SetProperty(
+                        solicitud => solicitud.FechaHoraSolicitud,
+                        fechaHoraSolicitud)
+                    .SetProperty(
+                        solicitud => solicitud.Estado,
+                        (sbyte)0)
+                    .SetProperty(
+                        solicitud => solicitud.MetodoMarcado,
+                        metodoMarcado)
+                    .SetProperty(
+                        solicitud => solicitud.IdUsuarioMarco,
+                        idUsuarioMarco));
+
+            return filasAfectadas == 1;
         }
 
         public async Task AgregarAsync(

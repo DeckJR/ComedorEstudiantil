@@ -27,6 +27,7 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Interfaces
             int idUsuario);
 
         Task<Solicitud?> BuscarPorIdAsync(int idSolicitud);
+        Task<bool> ReactivarAsync(int idSolicitud,DateTime fechaHoraSolicitud,sbyte metodoMarcado,int? idUsuarioMarco);
         Task AgregarAsync(Solicitud solicitud);
         Task GuardarCambiosAsync();
     }

@@ -187,15 +187,18 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             }
             else
             {
-                solicitudExistente.FechaHoraSolicitud = ahora;
-                solicitudExistente.Estado =
-                    (sbyte)EstadoSolicitud.Activa;
-                solicitudExistente.MetodoMarcado = metodo;
-                solicitudExistente.IdUsuarioMarco =
-                    idUsuarioMarco;
+                bool reactivada =
+                    await _repositorySolicitud.ReactivarAsync(
+                        solicitudExistente.IdSolicitud,
+                        ahora,
+                        metodo,
+                        idUsuarioMarco);
 
-                await _repositorySolicitud
-                    .GuardarCambiosAsync();
+                if (!reactivada)
+                {
+                    return ResultadoOperacionDTO.Error(
+                        "No fue posible reactivar la solicitud.");
+                }
             }
 
             return ResultadoOperacionDTO.Correcto(

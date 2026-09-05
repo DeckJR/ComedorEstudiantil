@@ -53,6 +53,9 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                 Menu menu =
                     solicitud.IdMenuNavigation;
 
+                int cantidadRepeticiones =
+                    entrega.Repeticionentrega.Count;
+
                 return new EntregaListaDTO
                 {
                     IdEntrega = entrega.IdEntrega,
@@ -61,15 +64,16 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                         $"{usuario.Nombre} {usuario.Apellidos}",
                     TipoComida =
                         menu.IdTipoComidaNavigation.Nombre,
-                    DescripcionMenu =
-                        menu.Descripcion,
-                    FechaHoraEntrega =
-                        entrega.FechaHoraEntrega,
+                    DescripcionMenu = menu.Descripcion,
+                    FechaHoraEntrega = entrega.FechaHoraEntrega,
                     EntregadoPor =
                         $"{entrega.IdUsuarioEntregoNavigation.Nombre} {entrega.IdUsuarioEntregoNavigation.Apellidos}",
                     MetodoEntrega =
-                        ObtenerNombreMetodo(
-                            entrega.MetodoEntrega)
+                        ObtenerNombreMetodo(entrega.MetodoEntrega),
+                    CantidadRepeticiones =
+                        cantidadRepeticiones,
+                    CantidadPlatosConsumidos =
+                        cantidadRepeticiones + 1
                 };
             }).ToList();
         }

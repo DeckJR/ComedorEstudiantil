@@ -70,21 +70,15 @@
                                 <td class="text-end">
                                     @if (solicitud.PuedeCancelar)
                                     {
-                                        <form asp-controller="Solicitud"
-                                              asp-action="Cancelar"
-                                              method="post">
-                                            @Html.AntiForgeryToken()
-
-                                            <input name="idSolicitud"
-                                                   value="@solicitud.IdSolicitud"
-                                                   type="hidden" />
-
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-outline-danger"
-                                                    onclick="return confirm('¿Desea cancelar esta solicitud?');">
-                                                Cancelar
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalCancelarSolicitud"
+                                                data-id-solicitud="@solicitud.IdSolicitud"
+                                                data-tipo-comida="@solicitud.TipoComida"
+                                                data-descripcion="@solicitud.DescripcionMenu">
+                                            Cancelar
+                                        </button>
                                     }
                                     else
                                     {
@@ -111,3 +105,86 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade"
+     id="modalCancelarSolicitud"
+     tabindex="-1"
+     aria-labelledby="tituloModalCancelarSolicitud"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-controller="Solicitud"
+                  asp-action="Cancelar"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <input id="idSolicitudCancelar"
+                       name="idSolicitud"
+                       type="hidden" />
+
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5"
+                        id="tituloModalCancelarSolicitud">
+                        Cancelar solicitud
+                    </h2>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        ¿Desea cancelar esta solicitud?
+                    </p>
+
+                    <div class="alert alert-warning mb-0">
+                        <div>
+                            <strong>Tipo de comida:</strong>
+                            <span id="tipoComidaCancelar"></span>
+                        </div>
+
+                        <div>
+                            <strong>Menú:</strong>
+                            <span id="descripcionMenuCancelar"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Volver
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-danger">
+                        Confirmar cancelación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("modalCancelarSolicitud");
+            const campoIdSolicitud = document.getElementById("idSolicitudCancelar");
+            const campoTipoComida = document.getElementById("tipoComidaCancelar");
+            const campoDescripcion = document.getElementById("descripcionMenuCancelar");
+
+            modal.addEventListener("show.bs.modal", function (event) {
+                const boton = event.relatedTarget;
+
+                campoIdSolicitud.value = boton.dataset.idSolicitud;
+                campoTipoComida.textContent = boton.dataset.tipoComida;
+                campoDescripcion.textContent = boton.dataset.descripcion;
+            });
+        });
+    </script>
+}

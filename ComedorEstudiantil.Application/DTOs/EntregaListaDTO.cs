@@ -16,5 +16,7 @@ namespace ComedorEstudiantil.Application.DTOs
         public DateTime FechaHoraEntrega { get; set; }
         public string EntregadoPor { get; set; } = string.Empty;
         public string MetodoEntrega { get; set; } = string.Empty;
+        public int CantidadRepeticiones { get; set; }
+        public int CantidadPlatosConsumidos { get; set; }
     }
 }
