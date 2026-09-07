@@ -1,0 +1,47 @@
+﻿@model ComedorEstudiantil.Application.DTOs.TipoComidaFormularioDTO
+
+@{
+    ViewData["Title"] = "Editar horario";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="h4 mb-0">
+                        Editar horario de comida
+                    </h1>
+                </div>
+
+                <div class="card-body">
+                    <form asp-controller="TipoComida"
+                          asp-action="Editar"
+                          method="post">
+                        @Html.AntiForgeryToken()
+
+                        <partial name="~/Views/TipoComida/_Formulario.cshtml"
+                                 model="Model" />
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-controller="TipoComida"
+                               asp-action="Index"
+                               class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Guardar cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

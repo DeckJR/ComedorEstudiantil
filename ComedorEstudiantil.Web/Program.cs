@@ -100,6 +100,7 @@ builder.Services.AddScoped<IRepositoryReporte, RepositoryReporte>();
 builder.Services.AddScoped<IRepositoryBitacora, RepositoryBitacora>();
 builder.Services.AddScoped<IRepositoryRepeticionEntrega,RepositoryRepeticionEntrega>();
 
+builder.Services.AddScoped<IServiceTipoComida, ServiceTipoComida>();
 builder.Services.AddScoped<IServiceBitacora, ServiceBitacora>();
 builder.Services.AddScoped<IServiceReporte, ServiceReporte>();
 builder.Services.AddScoped<IServiceEntrega, ServiceEntrega>();
@@ -178,6 +179,16 @@ builder.Services.AddAuthorization(options =>
         {
             policy.RequireRole(
                 "Cocina",
+                "Direccion",
+                "Director",
+                "Administrador");
+        });
+
+    options.AddPolicy(
+        PoliticasAutorizacion.GestionarHorarios,
+        policy =>
+        {
+            policy.RequireRole(
                 "Direccion",
                 "Director",
                 "Administrador");

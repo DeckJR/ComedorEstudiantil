@@ -1,0 +1,209 @@
+﻿@model IEnumerable<ComedorEstudiantil.Application.DTOs.TipoComidaListaDTO>
+
+@{
+    ViewData["Title"] = "Horarios de comida";
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                Horarios de comida
+            </h1>
+
+            <p class="text-muted mb-0">
+                Administración de los tipos de comida y sus horas límite.
+            </p>
+        </div>
+
+        <a asp-controller="TipoComida"
+           asp-action="Crear"
+           class="btn btn-primary">
+            Crear horario
+        </a>
+    </div>
+
+    @if (TempData["MensajeExito"] is not null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            @TempData["MensajeExito"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar">
+            </button>
+        </div>
+    }
+
+    @if (TempData["MensajeError"] is not null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+            @TempData["MensajeError"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar">
+            </button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Tipo de comida</th>
+                            <th>Hora límite</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var tipoComida in Model)
+                        {
+                            <tr>
+                                <td>@tipoComida.Nombre</td>
+                                <td>
+                                    @tipoComida.HoraLimiteMarcar.ToString("HH:mm")
+                                </td>
+                                <td>
+                                    @if (tipoComida.Activo)
+                                    {
+                                        <span class="badge bg-success">
+                                            Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            Inactivo
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex flex-wrap justify-content-end gap-2">
+                                        <a asp-controller="TipoComida"
+                                           asp-action="Editar"
+                                           asp-route-id="@tipoComida.IdTipoComida"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Editar
+                                        </a>
+
+                                        <button type="button"
+                                                class="btn btn-sm @(tipoComida.Activo ? "btn-outline-danger" : "btn-outline-success")"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalCambiarEstado"
+                                                data-id-tipo-comida="@tipoComida.IdTipoComida"
+                                                data-nombre="@tipoComida.Nombre"
+                                                data-activo="@tipoComida.Activo.ToString().ToLowerInvariant()">
+                                            @(tipoComida.Activo ? "Desactivar" : "Activar")
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="4"
+                                    class="text-center text-muted py-4">
+                                    No existen horarios de comida registrados.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade"
+     id="modalCambiarEstado"
+     tabindex="-1"
+     aria-labelledby="tituloModalCambiarEstado"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-controller="TipoComida"
+                  asp-action="CambiarEstado"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <input id="idTipoComidaEstado"
+                       name="id"
+                       type="hidden" />
+
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5"
+                        id="tituloModalCambiarEstado">
+                        Cambiar estado
+                    </h2>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p id="mensajeCambiarEstado"
+                       class="mb-0">
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Volver
+                    </button>
+
+                    <button id="botonConfirmarEstado"
+                            type="submit"
+                            class="btn">
+                        Confirmar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("modalCambiarEstado");
+            const campoId = document.getElementById("idTipoComidaEstado");
+            const mensaje = document.getElementById("mensajeCambiarEstado");
+            const botonConfirmar = document.getElementById("botonConfirmarEstado");
+
+            modal.addEventListener("show.bs.modal", function (event) {
+                const boton = event.relatedTarget;
+                const idTipoComida = boton.dataset.idTipoComida;
+                const nombre = boton.dataset.nombre;
+                const estaActivo = boton.dataset.activo === "true";
+                const accion = estaActivo ? "desactivar" : "activar";
+
+                campoId.value = idTipoComida;
+                mensaje.textContent =
+                    `¿Desea ${accion} el horario de ${nombre}?`;
+
+                botonConfirmar.textContent =
+                    estaActivo ? "Desactivar" : "Activar";
+
+                botonConfirmar.className =
+                    estaActivo
+                        ? "btn btn-danger"
+                        : "btn btn-success";
+            });
+        });
+    </script>
+}

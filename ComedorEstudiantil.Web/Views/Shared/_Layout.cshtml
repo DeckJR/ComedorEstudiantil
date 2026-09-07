@@ -87,6 +87,20 @@
                                 </a>
                             </li>
                         }
+
+                        @if (User.IsInRole("Direccion") ||
+                        User.IsInRole("Director") ||
+                        User.IsInRole("Administrador"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="TipoComida"
+                                   asp-action="Index">
+                                    Horarios
+                                </a>
+                            </li>
+                        }
+
                         @if (User.IsInRole("Direccion") ||
                         User.IsInRole("Director") ||
                         User.IsInRole("Administrador"))

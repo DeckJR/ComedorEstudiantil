@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ComedorEstudiantil.Infraestructure.Data;
+﻿using ComedorEstudiantil.Infraestructure.Data;
 using ComedorEstudiantil.Infraestructure.Models;
 using ComedorEstudiantil.Infraestructure.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -20,12 +15,27 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
             _context = context;
         }
 
+        public async Task<List<Tipocomida>> ListarAsync()
+        {
+            return await _context.Set<Tipocomida>()
+                .AsNoTracking()
+                .OrderBy(tipoComida =>
+                    tipoComida.HoraLimiteMarcar)
+                .ThenBy(tipoComida =>
+                    tipoComida.Nombre)
+                .ToListAsync();
+        }
+
         public async Task<List<Tipocomida>> ListarActivosAsync()
         {
             return await _context.Set<Tipocomida>()
                 .AsNoTracking()
-                .Where(tipo => tipo.Activo == true)
-                .OrderBy(tipo => tipo.HoraLimiteMarcar)
+                .Where(tipoComida =>
+                    tipoComida.Activo == true)
+                .OrderBy(tipoComida =>
+                    tipoComida.HoraLimiteMarcar)
+                .ThenBy(tipoComida =>
+                    tipoComida.Nombre)
                 .ToListAsync();
         }
 
@@ -34,8 +44,45 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
         {
             return await _context.Set<Tipocomida>()
                 .AsNoTracking()
-                .FirstOrDefaultAsync(tipo =>
-                    tipo.IdTipoComida == idTipoComida);
+                .FirstOrDefaultAsync(tipoComida =>
+                    tipoComida.IdTipoComida ==
+                    idTipoComida);
+        }
+
+        public async Task<Tipocomida?>
+            BuscarPorIdParaEdicionAsync(
+                int idTipoComida)
+        {
+            return await _context.Set<Tipocomida>()
+                .FirstOrDefaultAsync(tipoComida =>
+                    tipoComida.IdTipoComida ==
+                    idTipoComida);
+        }
+
+        public async Task<bool> ExisteNombreAsync(
+            string nombre,
+            int? idTipoComidaExcluir = null)
+        {
+            return await _context.Set<Tipocomida>()
+                .AnyAsync(tipoComida =>
+                    tipoComida.Nombre == nombre &&
+                    (!idTipoComidaExcluir.HasValue ||
+                     tipoComida.IdTipoComida !=
+                     idTipoComidaExcluir.Value));
+        }
+
+        public async Task AgregarAsync(
+            Tipocomida tipoComida)
+        {
+            await _context.Set<Tipocomida>()
+                .AddAsync(tipoComida);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task GuardarCambiosAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }
