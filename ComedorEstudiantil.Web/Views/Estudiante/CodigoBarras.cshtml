@@ -1,0 +1,101 @@
+﻿@model ComedorEstudiantil.Application.DTOs.CodigoBarrasUsuarioDTO
+
+@{
+    ViewData["Title"] = "Código de barras";
+
+    int idEstudiante =
+        ViewData["IdEstudiante"] is int id
+            ? id
+            : 0;
+
+    string? urlImagen =
+        Url.Action(
+            "ImagenCodigoBarras",
+            "Estudiante",
+            new
+            {
+                id = idEstudiante
+            });
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm
+                mx-auto tarjeta-codigo">
+        <div class="card-body text-center p-4">
+            <h1 class="h4 mb-3">
+                Comedor Estudiantil
+            </h1>
+
+            <h2 class="h5 mb-1">
+                @Model.NombreCompleto
+            </h2>
+
+            <p class="mb-3">
+                Cédula: @Model.Identificacion
+            </p>
+
+            <div class="mb-3">
+                <img src="@urlImagen"
+                     alt="Código de barras de @Model.NombreCompleto"
+                     class="codigo-barras" />
+            </div>
+
+            <div class="fw-bold font-monospace">
+                @Model.CodigoBarras
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center
+                gap-2 mt-4 no-imprimir">
+        <button type="button"
+                class="btn btn-primary"
+                onclick="window.print();">
+            Imprimir
+        </button>
+
+        <a asp-controller="Estudiante"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+    </div>
+</div>
+
+<style>
+    .tarjeta-codigo {
+        max-width: 560px;
+        border: 2px solid #212529;
+        border-radius: 12px;
+    }
+
+    .codigo-barras {
+        display: block;
+        width: 100%;
+        max-width: 480px;
+        height: 160px;
+        object-fit: fill;
+        margin: 0 auto;
+    }
+
+    @@media print {
+        header,
+        footer,
+        .no-imprimir {
+            display: none !important;
+        }
+
+        body {
+            background: white;
+        }
+
+        .container {
+            max-width: none;
+        }
+
+        .tarjeta-codigo {
+            border: 2px solid #212529 !important;
+            box-shadow: none !important;
+        }
+    }
+</style>

@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Reflection;
+using System.Security.Claims;
 using ComedorEstudiantil.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -7,8 +8,25 @@ namespace ComedorEstudiantil.Web.Filters
 {
     public class AuditoriaActionFilter : IAsyncActionFilter
     {
-        private readonly IServiceBitacora _serviceBitacora;
-        private readonly ILogger<AuditoriaActionFilter> _logger;
+        private static readonly string[] NombresIdentificadores =
+        {
+            "id",
+            "idUsuario",
+            "idEstudiante",
+            "idMenu",
+            "idActividad",
+            "idSolicitud",
+            "idEntrega",
+            "idRepeticionEntrega",
+            "idTipoComida",
+            "idGradoSeccion"
+        };
+
+        private readonly IServiceBitacora
+            _serviceBitacora;
+
+        private readonly ILogger<AuditoriaActionFilter>
+            _logger;
 
         public AuditoriaActionFilter(
             IServiceBitacora serviceBitacora,
@@ -53,15 +71,21 @@ namespace ComedorEstudiantil.Web.Filters
                 bool operacionExitosa =
                     EsOperacionExitosa(resultado);
 
-                string detalle = operacionExitosa
-                    ? $"Operación HTTP {context.HttpContext.Request.Method} completada correctamente."
-                    : $"Operación HTTP {context.HttpContext.Request.Method} rechazada o no completada.";
+                string accionBitacora =
+                    operacionExitosa
+                        ? accion
+                        : $"IntentoFallido{accion}";
+
+                string detalle =
+                    CrearDetalle(
+                        context.HttpContext.Request.Method,
+                        controlador,
+                        accion,
+                        operacionExitosa);
 
                 await _serviceBitacora.RegistrarAsync(
                     idUsuario,
-                    operacionExitosa
-                        ? accion
-                        : $"IntentoFallido{accion}",
+                    accionBitacora,
                     controlador,
                     idEntidad,
                     detalle,
@@ -135,13 +159,60 @@ namespace ComedorEstudiantil.Web.Filters
                 return statusCode.StatusCode < 400;
             }
 
-            if (context.Result is ObjectResult objectResult &&
-                objectResult.StatusCode.HasValue)
+            if (context.Result is ObjectResult objectResult)
             {
-                return objectResult.StatusCode.Value < 400;
+                if (objectResult.StatusCode.HasValue &&
+                    objectResult.StatusCode.Value >= 400)
+                {
+                    return false;
+                }
+
+                bool? resultadoOperacion =
+                    ObtenerResultadoOperacion(
+                        objectResult.Value);
+
+                if (resultadoOperacion.HasValue)
+                {
+                    return resultadoOperacion.Value;
+                }
+            }
+
+            if (context.Result is JsonResult jsonResult)
+            {
+                bool? resultadoOperacion =
+                    ObtenerResultadoOperacion(
+                        jsonResult.Value);
+
+                if (resultadoOperacion.HasValue)
+                {
+                    return resultadoOperacion.Value;
+                }
             }
 
             return true;
+        }
+
+        private static bool? ObtenerResultadoOperacion(
+            object? resultado)
+        {
+            if (resultado is null)
+            {
+                return null;
+            }
+
+            PropertyInfo? propiedad =
+                resultado.GetType().GetProperty(
+                    "Exitoso",
+                    BindingFlags.Public |
+                    BindingFlags.Instance |
+                    BindingFlags.IgnoreCase);
+
+            if (propiedad?.PropertyType != typeof(bool))
+            {
+                return null;
+            }
+
+            return propiedad.GetValue(resultado) as bool?;
         }
 
         private static int? ObtenerIdUsuario(
@@ -161,18 +232,36 @@ namespace ComedorEstudiantil.Web.Filters
         private static int? ObtenerIdEntidad(
             IDictionary<string, object?> argumentos)
         {
-            string[] nombres =
-            {
-                "id",
-                "idUsuario",
-                "idEstudiante",
-                "idMenu",
-                "idActividad",
-                "idSolicitud",
-                "idEntrega"
-            };
+            int? identificadorDirecto =
+                BuscarIdentificadorDirecto(
+                    argumentos);
 
-            foreach (string nombre in nombres)
+            if (identificadorDirecto.HasValue)
+            {
+                return identificadorDirecto;
+            }
+
+            foreach (object? argumento
+                in argumentos.Values)
+            {
+                int? identificador =
+                    BuscarIdentificadorEnObjeto(
+                        argumento);
+
+                if (identificador.HasValue)
+                {
+                    return identificador;
+                }
+            }
+
+            return null;
+        }
+
+        private static int? BuscarIdentificadorDirecto(
+            IDictionary<string, object?> argumentos)
+        {
+            foreach (string nombre
+                in NombresIdentificadores)
             {
                 KeyValuePair<string, object?> argumento =
                     argumentos.FirstOrDefault(item =>
@@ -180,21 +269,100 @@ namespace ComedorEstudiantil.Web.Filters
                             nombre,
                             StringComparison.OrdinalIgnoreCase));
 
-                if (argumento.Value is int id)
-                {
-                    return id;
-                }
+                int? identificador =
+                    ConvertirIdentificador(
+                        argumento.Value);
 
-                if (argumento.Value is not null &&
-                    int.TryParse(
-                        argumento.Value.ToString(),
-                        out int idConvertido))
+                if (identificador.HasValue)
                 {
-                    return idConvertido;
+                    return identificador;
                 }
             }
 
             return null;
+        }
+
+        private static int? BuscarIdentificadorEnObjeto(
+            object? argumento)
+        {
+            if (argumento is null ||
+                argumento is string)
+            {
+                return null;
+            }
+
+            Type tipo = argumento.GetType();
+
+            if (tipo.IsPrimitive ||
+                tipo.IsEnum)
+            {
+                return null;
+            }
+
+            foreach (string nombre
+                in NombresIdentificadores)
+            {
+                PropertyInfo? propiedad =
+                    tipo.GetProperty(
+                        nombre,
+                        BindingFlags.Public |
+                        BindingFlags.Instance |
+                        BindingFlags.IgnoreCase);
+
+                if (propiedad is null)
+                {
+                    continue;
+                }
+
+                object? valor =
+                    propiedad.GetValue(argumento);
+
+                int? identificador =
+                    ConvertirIdentificador(valor);
+
+                if (identificador.HasValue)
+                {
+                    return identificador;
+                }
+            }
+
+            return null;
+        }
+
+        private static int? ConvertirIdentificador(
+            object? valor)
+        {
+            if (valor is int id &&
+                id > 0)
+            {
+                return id;
+            }
+
+            if (valor is not null &&
+                int.TryParse(
+                    valor.ToString(),
+                    out int idConvertido) &&
+                idConvertido > 0)
+            {
+                return idConvertido;
+            }
+
+            return null;
+        }
+
+        private static string CrearDetalle(
+            string metodo,
+            string controlador,
+            string accion,
+            bool operacionExitosa)
+        {
+            string resultado =
+                operacionExitosa
+                    ? "completada correctamente"
+                    : "rechazada o no completada";
+
+            return
+                $"Operación {metodo} {controlador}/{accion} {resultado}.";
         }
     }
 }

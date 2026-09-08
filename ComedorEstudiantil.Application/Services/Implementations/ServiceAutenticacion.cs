@@ -60,7 +60,8 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                 NombreCompleto = $"{usuario.Nombre} {usuario.Apellidos}",
                 Correo = usuario.Correo,
                 Rol = usuario.IdRolNavigation.Nombre,
-                DebeCambiarContrasena = usuario.DebeCambiarContrasena
+                DebeCambiarContrasena = usuario.DebeCambiarContrasena,
+                FechaUltimoCambioContrasena = usuario.FechaUltimoCambioContrasena
             };
         }
 

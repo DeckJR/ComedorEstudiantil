@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ComedorEstudiantil.Application.DTOs
+﻿namespace ComedorEstudiantil.Application.DTOs
 {
     public class UsuarioSesionDTO
     {
@@ -14,5 +8,6 @@ namespace ComedorEstudiantil.Application.DTOs
         public string Correo { get; set; } = string.Empty;
         public string Rol { get; set; } = string.Empty;
         public bool DebeCambiarContrasena { get; set; }
+        public DateTime? FechaUltimoCambioContrasena { get; set; }
     }
 }

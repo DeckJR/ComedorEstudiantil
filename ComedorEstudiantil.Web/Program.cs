@@ -13,6 +13,7 @@ using Serilog.Events;
 using ComedorEstudiantil.Web.Authorization;
 using ComedorEstudiantil.Web.Services;
 using ComedorEstudiantil.Web.Filters;
+using ComedorEstudiantil.Web.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -100,7 +101,9 @@ builder.Services.AddScoped<IRepositoryEntrega, RepositoryEntrega>();
 builder.Services.AddScoped<IRepositoryReporte, RepositoryReporte>();
 builder.Services.AddScoped<IRepositoryBitacora, RepositoryBitacora>();
 builder.Services.AddScoped<IRepositoryRepeticionEntrega,RepositoryRepeticionEntrega>();
+builder.Services.AddScoped<IRepositoryEstudiante,RepositoryEstudiante>();
 
+builder.Services.AddScoped<IServiceEstudiante,ServiceEstudiante>();
 builder.Services.AddScoped<IServiceGradoSeccion, ServiceGradoSeccion>();
 builder.Services.AddScoped<IServiceTipoComida, ServiceTipoComida>();
 builder.Services.AddScoped<IServiceBitacora, ServiceBitacora>();
@@ -112,7 +115,7 @@ builder.Services.AddScoped<IServiceActividad, ServiceActividad>();
 builder.Services.AddScoped<IServiceUsuario, ServiceUsuario>();
 builder.Services.AddScoped<IServiceAutenticacion,ServiceAutenticacion>();
 builder.Services.AddScoped<IPasswordHasher<Usuario>,PasswordHasher<Usuario>>();
-
+builder.Services.AddScoped<ValidacionCookieEvents>();
 
 builder.Services.AddScoped<AuditoriaActionFilter>();
 
@@ -123,7 +126,7 @@ builder.Services
     {
         options.LoginPath = "/Cuenta/IniciarSesion";
         options.AccessDeniedPath = "/Cuenta/AccesoDenegado";
-        options.Cookie.Name = "ComedorEstudiantil.Auth";
+        options.Cookie.Name = "ComedorEstudiantil.Auth.V2";
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy =
             CookieSecurePolicy.Always;
@@ -132,6 +135,8 @@ builder.Services
         options.ExpireTimeSpan =
             TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
+        options.EventsType =
+            typeof(ValidacionCookieEvents);
     });
 builder.Services.AddAuthorization(options =>
 {

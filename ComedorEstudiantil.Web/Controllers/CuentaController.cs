@@ -96,7 +96,11 @@ namespace ComedorEstudiantil.Web.Controllers
                     usuario.Identificacion),
                 new Claim(
                     "DebeCambiarContrasena",
-                    usuario.DebeCambiarContrasena.ToString())
+                    usuario.DebeCambiarContrasena.ToString()),
+                new Claim("FechaUltimoCambioContrasena",
+                    usuario.FechaUltimoCambioContrasena?.Ticks.
+                        ToString(System.Globalization.CultureInfo.
+                        InvariantCulture)?? string.Empty)
             };
 
             var identidad = new ClaimsIdentity(

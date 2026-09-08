@@ -1,0 +1,48 @@
+﻿@model ComedorEstudiantil.Application.DTOs.EstudianteFormularioDTO
+
+@{
+    ViewData["Title"] = "Crear estudiante";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h1 class="h3 mb-1">
+            Crear estudiante
+        </h1>
+
+        <p class="text-muted mb-0">
+            Registre una nueva cuenta de estudiante.
+        </p>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-controller="Estudiante"
+                  asp-action="Crear"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <partial name="_Formulario"
+                         model="Model" />
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Crear estudiante
+                    </button>
+
+                    <a asp-controller="Estudiante"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}
