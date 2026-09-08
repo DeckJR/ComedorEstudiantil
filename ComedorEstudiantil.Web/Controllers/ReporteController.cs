@@ -1,4 +1,5 @@
-﻿using ComedorEstudiantil.Application.DTOs;
+﻿using System.Security.Claims;
+using ComedorEstudiantil.Application.DTOs;
 using ComedorEstudiantil.Application.Services.Interfaces;
 using ComedorEstudiantil.Web.Authorization;
 using ComedorEstudiantil.Web.Services;
@@ -7,24 +8,39 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ComedorEstudiantil.Web.Controllers
 {
-    [Authorize(Policy = PoliticasAutorizacion.VerReportes)]
+    [Authorize(
+        Policy = PoliticasAutorizacion.VerReportes)]
     public class ReporteController : Controller
     {
-        private readonly IServiceReporte _serviceReporte;
-        private readonly IReportePdfService _reportePdfService;
-        private readonly IFechaHoraService _fechaHoraService;
-        private readonly IServiceBitacora _serviceBitacora;
-        private readonly ILogger<ReporteController> _logger;
+        private readonly IServiceReporte
+            _serviceReporte;
+
+        private readonly IReportePdfService
+            _reportePdfService;
+
+        private readonly IReporteExcelService
+            _reporteExcelService;
+
+        private readonly IFechaHoraService
+            _fechaHoraService;
+
+        private readonly IServiceBitacora
+            _serviceBitacora;
+
+        private readonly ILogger<ReporteController>
+            _logger;
 
         public ReporteController(
             IServiceReporte serviceReporte,
             IReportePdfService reportePdfService,
+            IReporteExcelService reporteExcelService,
             IFechaHoraService fechaHoraService,
             IServiceBitacora serviceBitacora,
             ILogger<ReporteController> logger)
         {
             _serviceReporte = serviceReporte;
             _reportePdfService = reportePdfService;
+            _reporteExcelService = reporteExcelService;
             _fechaHoraService = fechaHoraService;
             _serviceBitacora = serviceBitacora;
             _logger = logger;
@@ -47,7 +63,8 @@ namespace ComedorEstudiantil.Web.Controllers
             }
 
             ReporteGeneralDTO reporte =
-                await _serviceReporte.GenerarAsync(filtro);
+                await _serviceReporte.GenerarAsync(
+                    filtro);
 
             return View(reporte);
         }
@@ -57,22 +74,24 @@ namespace ComedorEstudiantil.Web.Controllers
             FiltroReporteDTO filtro)
         {
             ReporteGeneralDTO reporte =
-                await _serviceReporte.GenerarAsync(filtro);
+                await _serviceReporte.GenerarAsync(
+                    filtro);
 
             byte[] archivo =
-                _reportePdfService.GenerarSolicitudes(reporte);
+                _reportePdfService
+                    .GenerarSolicitudes(reporte);
 
-            string nombre =
+            string nombreArchivo =
                 $"solicitudes-{filtro.FechaInicio:yyyyMMdd}-{filtro.FechaFin:yyyyMMdd}.pdf";
 
             await RegistrarDescargaAsync(
-    "DescargaReporteSolicitudesPdf",
-    filtro);
+                "DescargaReporteSolicitudesPdf",
+                filtro);
 
             return File(
                 archivo,
                 "application/pdf",
-                nombre);
+                nombreArchivo);
         }
 
         [HttpGet]
@@ -80,50 +99,90 @@ namespace ComedorEstudiantil.Web.Controllers
             FiltroReporteDTO filtro)
         {
             ReporteGeneralDTO reporte =
-                await _serviceReporte.GenerarAsync(filtro);
+                await _serviceReporte.GenerarAsync(
+                    filtro);
 
             byte[] archivo =
-                _reportePdfService.GenerarEntregas(reporte);
+                _reportePdfService
+                    .GenerarEntregas(reporte);
 
-            string nombre =
+            string nombreArchivo =
                 $"entregas-{filtro.FechaInicio:yyyyMMdd}-{filtro.FechaFin:yyyyMMdd}.pdf";
 
             await RegistrarDescargaAsync(
-    "DescargaReporteEntregasPdf",
-    filtro);
+                "DescargaReporteEntregasPdf",
+                filtro);
 
             return File(
                 archivo,
                 "application/pdf",
-                nombre);
+                nombreArchivo);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> SolicitudesExcel(
+            FiltroReporteDTO filtro)
+        {
+            ReporteGeneralDTO reporte =
+                await _serviceReporte.GenerarAsync(
+                    filtro);
+
+            byte[] archivo =
+                _reporteExcelService
+                    .GenerarSolicitudes(reporte);
+
+            string nombreArchivo =
+                $"solicitudes-{filtro.FechaInicio:yyyyMMdd}-{filtro.FechaFin:yyyyMMdd}.xlsx";
+
+            await RegistrarDescargaAsync(
+                "DescargaReporteSolicitudesExcel",
+                filtro);
+
+            return File(
+                archivo,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                nombreArchivo);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EntregasExcel(
+            FiltroReporteDTO filtro)
+        {
+            ReporteGeneralDTO reporte =
+                await _serviceReporte.GenerarAsync(
+                    filtro);
+
+            byte[] archivo =
+                _reporteExcelService
+                    .GenerarEntregas(reporte);
+
+            string nombreArchivo =
+                $"entregas-{filtro.FechaInicio:yyyyMMdd}-{filtro.FechaFin:yyyyMMdd}.xlsx";
+
+            await RegistrarDescargaAsync(
+                "DescargaReporteEntregasExcel",
+                filtro);
+
+            return File(
+                archivo,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                nombreArchivo);
+        }
+
         private async Task RegistrarDescargaAsync(
-    string accion,
-    FiltroReporteDTO filtro)
+            string accion,
+            FiltroReporteDTO filtro)
         {
             try
             {
-                int? idUsuario = null;
-
-                string? valor =
-                    User.FindFirst(
-                        System.Security.Claims.ClaimTypes
-                            .NameIdentifier)?
-                        .Value;
-
-                if (int.TryParse(
-                    valor,
-                    out int idConvertido))
-                {
-                    idUsuario = idConvertido;
-                }
+                int? idUsuario = ObtenerIdUsuarioActual();
 
                 await _serviceBitacora.RegistrarAsync(
                     idUsuario,
                     accion,
                     "Reporte",
                     null,
-                    $"Periodo consultado: {filtro.FechaInicio:dd/MM/yyyy} al {filtro.FechaFin:dd/MM/yyyy}.",
+                    $"Periodo consultado: {filtro.FechaInicio:dd/MM/yyyy} al {filtro.FechaFin:dd/MM/yyyy}. Tipo de comida: {ObtenerTipoComida(filtro)}. Estado: {ObtenerEstado(filtro)}.",
                     HttpContext.Connection
                         .RemoteIpAddress?
                         .ToString());
@@ -132,8 +191,45 @@ namespace ComedorEstudiantil.Web.Controllers
             {
                 _logger.LogError(
                     exception,
-                    "No fue posible registrar la descarga del reporte.");
+                    "No fue posible registrar la descarga del reporte {Accion}.",
+                    accion);
             }
+        }
+
+        private int? ObtenerIdUsuarioActual()
+        {
+            string? valor =
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
+
+            if (int.TryParse(
+                valor,
+                out int idUsuario))
+            {
+                return idUsuario;
+            }
+
+            return null;
+        }
+
+        private static string ObtenerTipoComida(
+            FiltroReporteDTO filtro)
+        {
+            return string.IsNullOrWhiteSpace(
+                filtro.TipoComida)
+                ? "Todos"
+                : filtro.TipoComida;
+        }
+
+        private static string ObtenerEstado(
+            FiltroReporteDTO filtro)
+        {
+            return filtro.Estado switch
+            {
+                0 => "Activa",
+                1 => "Cancelada",
+                _ => "Todos"
+            };
         }
     }
 }

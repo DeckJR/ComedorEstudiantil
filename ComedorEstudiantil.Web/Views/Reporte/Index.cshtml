@@ -230,6 +230,26 @@
            class="btn btn-outline-danger">
             Descargar entregas PDF
         </a>
+
+        <a asp-controller="Reporte"
+           asp-action="SolicitudesExcel"
+           asp-route-fechaInicio="@Model.Filtro.FechaInicio.ToString("yyyy-MM-dd")"
+           asp-route-fechaFin="@Model.Filtro.FechaFin.ToString("yyyy-MM-dd")"
+           asp-route-tipoComida="@Model.Filtro.TipoComida"
+           asp-route-estado="@Model.Filtro.Estado"
+           class="btn btn-outline-success">
+            Descargar solicitudes Excel
+        </a>
+
+        <a asp-controller="Reporte"
+           asp-action="EntregasExcel"
+           asp-route-fechaInicio="@Model.Filtro.FechaInicio.ToString("yyyy-MM-dd")"
+           asp-route-fechaFin="@Model.Filtro.FechaFin.ToString("yyyy-MM-dd")"
+           asp-route-tipoComida="@Model.Filtro.TipoComida"
+           asp-route-estado="@Model.Filtro.Estado"
+           class="btn btn-outline-success">
+            Descargar entregas Excel
+        </a>
     </div>
 
     <div class="card shadow-sm mb-4">
