@@ -1,0 +1,64 @@
+﻿@model ComedorEstudiantil.Application.DTOs.GradoSeccionFormularioDTO
+
+<input asp-for="IdGradoSeccion"
+       type="hidden" />
+
+<div asp-validation-summary="ModelOnly"
+     class="text-danger mb-3">
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label asp-for="Grado"
+               class="form-label">
+        </label>
+
+        <input asp-for="Grado"
+               class="form-control"
+               autocomplete="off"
+               placeholder="Ejemplo: 11" />
+
+        <span asp-validation-for="Grado"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label asp-for="Seccion"
+               class="form-label">
+        </label>
+
+        <input asp-for="Seccion"
+               class="form-control text-uppercase"
+               autocomplete="off"
+               placeholder="Ejemplo: 1 o 1BI" />
+
+        <span asp-validation-for="Seccion"
+              class="text-danger">
+        </span>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <div>
+        Para una sección regular:
+        <strong>Grado 7</strong> y
+        <strong>Sección 1</strong>.
+    </div>
+
+    <div>
+        Para Bachillerato Internacional:
+        <strong>Grado 11</strong> y
+        <strong>Sección 1BI</strong>.
+    </div>
+</div>
+
+<div class="form-check mb-3">
+    <input asp-for="Activo"
+           class="form-check-input" />
+
+    <label asp-for="Activo"
+           class="form-check-label">
+        Grado y sección activo
+    </label>
+</div>

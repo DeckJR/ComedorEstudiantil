@@ -100,6 +100,7 @@ builder.Services.AddScoped<IRepositoryReporte, RepositoryReporte>();
 builder.Services.AddScoped<IRepositoryBitacora, RepositoryBitacora>();
 builder.Services.AddScoped<IRepositoryRepeticionEntrega,RepositoryRepeticionEntrega>();
 
+builder.Services.AddScoped<IServiceGradoSeccion, ServiceGradoSeccion>();
 builder.Services.AddScoped<IServiceTipoComida, ServiceTipoComida>();
 builder.Services.AddScoped<IServiceBitacora, ServiceBitacora>();
 builder.Services.AddScoped<IServiceReporte, ServiceReporte>();

@@ -162,6 +162,9 @@ public partial class ComedorEstudiantilContext : DbContext
             entity.HasIndex(e => new { e.Grado, e.Seccion }, "UQ_Grado_Seccion").IsUnique();
 
             entity.Property(e => e.IdGradoSeccion).HasColumnType("int(11)");
+            entity.Property(e => e.Activo)
+                .IsRequired()
+                .HasDefaultValueSql("'1'");
             entity.Property(e => e.Grado).HasMaxLength(20);
             entity.Property(e => e.Seccion).HasMaxLength(10);
         });

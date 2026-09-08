@@ -1,0 +1,47 @@
+﻿@model ComedorEstudiantil.Application.DTOs.GradoSeccionFormularioDTO
+
+@{
+    ViewData["Title"] = "Crear grado y sección";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="h4 mb-0">
+                        Crear grado y sección
+                    </h1>
+                </div>
+
+                <div class="card-body">
+                    <form asp-controller="GradoSeccion"
+                          asp-action="Crear"
+                          method="post">
+                        @Html.AntiForgeryToken()
+
+                        <partial name="~/Views/GradoSeccion/_Formulario.cshtml"
+                                 model="Model" />
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-controller="GradoSeccion"
+                               asp-action="Index"
+                               class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
