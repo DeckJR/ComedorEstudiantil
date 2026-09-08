@@ -110,18 +110,26 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                 Entregas = entregasDTO,
                 TotalSolicitudes = solicitudesDTO.Count,
                 TotalActivas = solicitudesDTO.Count(
-                    solicitud =>
-                        solicitud.Estado == "Activa"),
+        solicitud =>
+            solicitud.Estado == "Activa"),
                 TotalCanceladas = solicitudesDTO.Count(
-                    solicitud =>
-                        solicitud.Estado == "Cancelada"),
+        solicitud =>
+            solicitud.Estado == "Cancelada"),
                 TotalEntregadas = solicitudesDTO.Count(
-                    solicitud =>
-                        solicitud.Entregada),
+        solicitud =>
+            solicitud.Entregada),
                 TotalPendientes = solicitudesDTO.Count(
-                    solicitud =>
-                        solicitud.Estado == "Activa" &&
-                        !solicitud.Entregada)
+        solicitud =>
+            solicitud.Estado == "Activa" &&
+            !solicitud.Entregada),
+                TotalEntregasIniciales =
+        entregasDTO.Count,
+                TotalRepeticiones =
+        entregasDTO.Sum(entrega =>
+            entrega.CantidadRepeticiones),
+                TotalPlatosServidos =
+        entregasDTO.Sum(entrega =>
+            entrega.CantidadPlatosConsumidos)
             };
         }
 
@@ -177,7 +185,7 @@ namespace ComedorEstudiantil.Application.Services.Implementations
         }
 
         private static ReporteEntregaDTO MapearEntrega(
-            Entrega entrega)
+    Entrega entrega)
         {
             Solicitud solicitud =
                 entrega.IdSolicitudNavigation;
@@ -187,6 +195,9 @@ namespace ComedorEstudiantil.Application.Services.Implementations
 
             Estudiante? estudiante =
                 usuario.Estudiante;
+
+            int cantidadRepeticiones =
+                entrega.Repeticionentrega.Count;
 
             return new ReporteEntregaDTO
             {
@@ -217,7 +228,11 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                     ObtenerMetodoEntrega(
                         entrega.MetodoEntrega),
                 EntregadoPor =
-                    $"{entrega.IdUsuarioEntregoNavigation.Nombre} {entrega.IdUsuarioEntregoNavigation.Apellidos}"
+                    $"{entrega.IdUsuarioEntregoNavigation.Nombre} {entrega.IdUsuarioEntregoNavigation.Apellidos}",
+                CantidadRepeticiones =
+                    cantidadRepeticiones,
+                CantidadPlatosConsumidos =
+                    cantidadRepeticiones + 1
             };
         }
 

@@ -89,7 +89,7 @@ namespace ComedorEstudiantil.Web.Controllers
                 $"entregas-{filtro.FechaInicio:yyyyMMdd}-{filtro.FechaFin:yyyyMMdd}.pdf";
 
             await RegistrarDescargaAsync(
-    "DescargaReporteSolicitudesPdf",
+    "DescargaReporteEntregasPdf",
     filtro);
 
             return File(

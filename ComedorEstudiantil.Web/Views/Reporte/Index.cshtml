@@ -22,6 +22,7 @@
                     <label asp-for="Filtro.FechaInicio"
                            class="form-label">
                     </label>
+
                     <input name="FechaInicio"
                            type="date"
                            value="@Model.Filtro.FechaInicio.ToString("yyyy-MM-dd")"
@@ -32,6 +33,7 @@
                     <label asp-for="Filtro.FechaFin"
                            class="form-label">
                     </label>
+
                     <input name="FechaFin"
                            type="date"
                            value="@Model.Filtro.FechaFin.ToString("yyyy-MM-dd")"
@@ -42,11 +44,13 @@
                     <label class="form-label">
                         Tipo de comida
                     </label>
+
                     <select name="TipoComida"
                             class="form-select">
                         <option value="">
                             Todos
                         </option>
+
                         @foreach (string tipo in Model.TiposComida)
                         {
                             <option value="@tipo"
@@ -61,15 +65,18 @@
                     <label class="form-label">
                         Estado
                     </label>
+
                     <select name="Estado"
                             class="form-select">
                         <option value="">
                             Todos
                         </option>
+
                         <option value="0"
                                 selected="@(Model.Filtro.Estado == 0)">
                             Activa
                         </option>
+
                         <option value="1"
                                 selected="@(Model.Filtro.Estado == 1)">
                             Cancelada
@@ -91,7 +98,10 @@
         <div class="col-md">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted">Solicitudes</div>
+                    <div class="text-muted">
+                        Solicitudes
+                    </div>
+
                     <div class="fs-3 fw-bold">
                         @Model.TotalSolicitudes
                     </div>
@@ -102,7 +112,10 @@
         <div class="col-md">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted">Activas</div>
+                    <div class="text-muted">
+                        Activas
+                    </div>
+
                     <div class="fs-3 fw-bold text-success">
                         @Model.TotalActivas
                     </div>
@@ -113,7 +126,10 @@
         <div class="col-md">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted">Canceladas</div>
+                    <div class="text-muted">
+                        Canceladas
+                    </div>
+
                     <div class="fs-3 fw-bold text-secondary">
                         @Model.TotalCanceladas
                     </div>
@@ -124,7 +140,10 @@
         <div class="col-md">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted">Entregadas</div>
+                    <div class="text-muted">
+                        Entregadas
+                    </div>
+
                     <div class="fs-3 fw-bold text-primary">
                         @Model.TotalEntregadas
                     </div>
@@ -135,9 +154,56 @@
         <div class="col-md">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted">Pendientes</div>
+                    <div class="text-muted">
+                        Pendientes
+                    </div>
+
                     <div class="fs-3 fw-bold text-warning">
                         @Model.TotalPendientes
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted">
+                        Entregas iniciales
+                    </div>
+
+                    <div class="fs-2 fw-bold text-primary">
+                        @Model.TotalEntregasIniciales
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted">
+                        Repeticiones
+                    </div>
+
+                    <div class="fs-2 fw-bold text-warning">
+                        @Model.TotalRepeticiones
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 border-primary">
+                <div class="card-body text-center">
+                    <div class="text-muted">
+                        Total de platos servidos
+                    </div>
+
+                    <div class="fs-2 fw-bold text-primary">
+                        @Model.TotalPlatosServidos
                     </div>
                 </div>
             </div>
@@ -170,6 +236,7 @@
         <div class="card-header">
             <strong>Solicitudes</strong>
         </div>
+
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-striped table-hover align-middle">
@@ -186,6 +253,7 @@
                             <th>Entrega</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @foreach (var solicitud in Model.Solicitudes)
                         {
@@ -199,11 +267,33 @@
                                 <td>@solicitud.Rol</td>
                                 <td>@solicitud.TipoBeneficiario</td>
                                 <td>@solicitud.GradoSeccion</td>
-                                <td>@solicitud.Estado</td>
                                 <td>
-                                    @(solicitud.Entregada
-                                        ? "Entregada"
-                                        : "Pendiente")
+                                    @if (solicitud.Estado == "Activa")
+                                    {
+                                        <span class="badge bg-success">
+                                            Activa
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            Cancelada
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (solicitud.Entregada)
+                                    {
+                                        <span class="badge bg-primary">
+                                            Entregada
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            Pendiente
+                                        </span>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -227,6 +317,7 @@
         <div class="card-header">
             <strong>Entregas</strong>
         </div>
+
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-striped table-hover align-middle">
@@ -240,8 +331,11 @@
                             <th>Hora</th>
                             <th>Método</th>
                             <th>Registrado por</th>
+                            <th class="text-center">Repeticiones</th>
+                            <th class="text-center">Platos</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @foreach (var entrega in Model.Entregas)
                         {
@@ -258,13 +352,32 @@
                                 </td>
                                 <td>@entrega.MetodoEntrega</td>
                                 <td>@entrega.EntregadoPor</td>
+                                <td class="text-center">
+                                    @if (entrega.CantidadRepeticiones > 0)
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            @entrega.CantidadRepeticiones
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            0
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary">
+                                        @entrega.CantidadPlatosConsumidos
+                                    </span>
+                                </td>
                             </tr>
                         }
 
                         @if (!Model.Entregas.Any())
                         {
                             <tr>
-                                <td colspan="8"
+                                <td colspan="10"
                                     class="text-center text-muted py-4">
                                     No existen entregas para el periodo seleccionado.
                                 </td>

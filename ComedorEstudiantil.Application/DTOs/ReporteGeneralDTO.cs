@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-namespace ComedorEstudiantil.Application.DTOs
+﻿namespace ComedorEstudiantil.Application.DTOs
 {
     public class ReporteGeneralDTO
     {
@@ -16,5 +11,8 @@ namespace ComedorEstudiantil.Application.DTOs
         public int TotalCanceladas { get; set; }
         public int TotalEntregadas { get; set; }
         public int TotalPendientes { get; set; }
+        public int TotalEntregasIniciales { get; set; }
+        public int TotalRepeticiones { get; set; }
+        public int TotalPlatosServidos { get; set; }
     }
 }

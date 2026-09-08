@@ -27,7 +27,9 @@ namespace ComedorEstudiantil.Web.Services
                         column.Spacing(10);
 
                         column.Item().Element(container =>
-                            CrearResumen(container, reporte));
+                            CrearResumenSolicitudes(
+                                container,
+                                reporte));
 
                         column.Item().Table(table =>
                         {
@@ -45,42 +47,73 @@ namespace ComedorEstudiantil.Web.Services
 
                             table.Header(header =>
                             {
-                                EncabezadoCelda(header.Cell(), "Fecha");
-                                EncabezadoCelda(header.Cell(), "Tipo");
-                                EncabezadoCelda(header.Cell(), "Identificación");
-                                EncabezadoCelda(header.Cell(), "Usuario");
-                                EncabezadoCelda(header.Cell(), "Rol");
-                                EncabezadoCelda(header.Cell(), "Beneficio");
-                                EncabezadoCelda(header.Cell(), "Estado");
-                                EncabezadoCelda(header.Cell(), "Entrega");
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Fecha");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Tipo");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Identificación");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Usuario");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Rol");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Beneficio");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Estado");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Entrega");
                             });
 
                             foreach (ReporteSolicitudDTO solicitud
                                 in reporte.Solicitudes)
                             {
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     solicitud.FechaMenu
                                         .ToString("dd/MM/yyyy"));
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     solicitud.TipoComida);
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     solicitud.Identificacion);
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     solicitud.NombreUsuario);
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     solicitud.Rol);
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     solicitud.TipoBeneficiario);
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     solicitud.Estado);
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     solicitud.Entregada
                                         ? "Entregada"
                                         : "Pendiente");
@@ -88,7 +121,8 @@ namespace ComedorEstudiantil.Web.Services
                         });
                     });
 
-                    page.Footer().Element(CrearPiePagina);
+                    page.Footer().Element(
+                        CrearPiePagina);
                 });
             }).GeneratePdf();
         }
@@ -112,64 +146,122 @@ namespace ComedorEstudiantil.Web.Services
                     {
                         column.Spacing(10);
 
-                        column.Item().Text(
-                            $"Total de entregas: {reporte.Entregas.Count}")
-                            .SemiBold();
+                        column.Item().Element(container =>
+                            CrearResumenEntregas(
+                                container,
+                                reporte));
 
                         column.Item().Table(table =>
                         {
                             table.ColumnsDefinition(columns =>
                             {
-                                columns.ConstantColumn(55);
-                                columns.ConstantColumn(65);
-                                columns.RelativeColumn(2);
+                                columns.ConstantColumn(52);
+                                columns.ConstantColumn(60);
+                                columns.ConstantColumn(82);
                                 columns.RelativeColumn(2);
                                 columns.RelativeColumn();
-                                columns.RelativeColumn();
+                                columns.ConstantColumn(40);
+                                columns.ConstantColumn(60);
                                 columns.RelativeColumn(2);
+                                columns.ConstantColumn(48);
+                                columns.ConstantColumn(42);
                             });
 
                             table.Header(header =>
                             {
-                                EncabezadoCelda(header.Cell(), "Fecha");
-                                EncabezadoCelda(header.Cell(), "Tipo");
-                                EncabezadoCelda(header.Cell(), "Identificación");
-                                EncabezadoCelda(header.Cell(), "Usuario");
-                                EncabezadoCelda(header.Cell(), "Rol");
-                                EncabezadoCelda(header.Cell(), "Hora");
-                                EncabezadoCelda(header.Cell(), "Registrado por");
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Fecha");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Tipo");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Identificación");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Usuario");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Rol");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Hora");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Método");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Registrado por");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Repet.");
+
+                                EncabezadoCelda(
+                                    header.Cell(),
+                                    "Platos");
                             });
 
                             foreach (ReporteEntregaDTO entrega
                                 in reporte.Entregas)
                             {
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     entrega.FechaMenu
                                         .ToString("dd/MM/yyyy"));
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     entrega.TipoComida);
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     entrega.Identificacion);
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     entrega.NombreUsuario);
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     entrega.Rol);
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
                                     entrega.FechaHoraEntrega
                                         .ToString("HH:mm"));
 
-                                Celda(table.Cell(),
+                                Celda(
+                                    table.Cell(),
+                                    entrega.MetodoEntrega);
+
+                                Celda(
+                                    table.Cell(),
                                     entrega.EntregadoPor);
+
+                                Celda(
+                                    table.Cell(),
+                                    entrega.CantidadRepeticiones
+                                        .ToString());
+
+                                Celda(
+                                    table.Cell(),
+                                    entrega.CantidadPlatosConsumidos
+                                        .ToString());
                             }
                         });
                     });
 
-                    page.Footer().Element(CrearPiePagina);
+                    page.Footer().Element(
+                        CrearPiePagina);
                 });
             }).GeneratePdf();
         }
@@ -179,6 +271,7 @@ namespace ComedorEstudiantil.Web.Services
         {
             page.Size(PageSizes.A4.Landscape());
             page.Margin(25);
+
             page.DefaultTextStyle(style =>
                 style.FontSize(8));
         }
@@ -219,27 +312,53 @@ namespace ComedorEstudiantil.Web.Services
                 });
         }
 
-        private static void CrearResumen(
+        private static void CrearResumenSolicitudes(
             IContainer container,
             ReporteGeneralDTO reporte)
         {
-            container.Row(row =>
-            {
-                row.RelativeItem().Text(
-                    $"Solicitudes: {reporte.TotalSolicitudes}");
+            container
+                .Background(Colors.Grey.Lighten3)
+                .Padding(8)
+                .Row(row =>
+                {
+                    row.RelativeItem().Text(
+                        $"Solicitudes: {reporte.TotalSolicitudes}");
 
-                row.RelativeItem().Text(
-                    $"Activas: {reporte.TotalActivas}");
+                    row.RelativeItem().Text(
+                        $"Activas: {reporte.TotalActivas}");
 
-                row.RelativeItem().Text(
-                    $"Canceladas: {reporte.TotalCanceladas}");
+                    row.RelativeItem().Text(
+                        $"Canceladas: {reporte.TotalCanceladas}");
 
-                row.RelativeItem().Text(
-                    $"Entregadas: {reporte.TotalEntregadas}");
+                    row.RelativeItem().Text(
+                        $"Entregadas: {reporte.TotalEntregadas}");
 
-                row.RelativeItem().Text(
-                    $"Pendientes: {reporte.TotalPendientes}");
-            });
+                    row.RelativeItem().Text(
+                        $"Pendientes: {reporte.TotalPendientes}");
+                });
+        }
+
+        private static void CrearResumenEntregas(
+            IContainer container,
+            ReporteGeneralDTO reporte)
+        {
+            container
+                .Background(Colors.Grey.Lighten3)
+                .Padding(8)
+                .Row(row =>
+                {
+                    row.RelativeItem().Text(
+                        $"Entregas iniciales: {reporte.TotalEntregasIniciales}")
+                        .SemiBold();
+
+                    row.RelativeItem().Text(
+                        $"Repeticiones: {reporte.TotalRepeticiones}")
+                        .SemiBold();
+
+                    row.RelativeItem().Text(
+                        $"Total de platos: {reporte.TotalPlatosServidos}")
+                        .SemiBold();
+                });
         }
 
         private static void EncabezadoCelda(

@@ -99,6 +99,8 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
                         menu.IdTipoComidaNavigation)
                 .Include(entrega =>
                     entrega.IdUsuarioEntregoNavigation)
+                .Include(entrega =>
+                    entrega.Repeticionentrega)
                 .Where(entrega =>
                     entrega.FechaHoraEntrega >= fechaInicio &&
                     entrega.FechaHoraEntrega < fechaFin)

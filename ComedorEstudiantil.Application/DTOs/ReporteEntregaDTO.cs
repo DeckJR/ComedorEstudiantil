@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-namespace ComedorEstudiantil.Application.DTOs
+﻿namespace ComedorEstudiantil.Application.DTOs
 {
     public class ReporteEntregaDTO
     {
@@ -19,5 +14,7 @@ namespace ComedorEstudiantil.Application.DTOs
         public DateTime FechaHoraEntrega { get; set; }
         public string MetodoEntrega { get; set; } = string.Empty;
         public string EntregadoPor { get; set; } = string.Empty;
+        public int CantidadRepeticiones { get; set; }
+        public int CantidadPlatosConsumidos { get; set; }
     }
 }
