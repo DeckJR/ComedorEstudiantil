@@ -1,31 +1,543 @@
 html {
-  font-size: 14px;
+    position: relative;
+    min-height: 100%;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    min-height: 100vh;
+    margin-bottom: 90px;
+    background-color: #ffffff;
+    color: #212529;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus,
+.form-select:focus,
+.nav-link:focus,
+.dropdown-item:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Encabezado institucional */
+
+.navbar {
+    min-height: 76px;
+}
+
+.marca-enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-right: 1.75rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    color: #172033;
+    text-decoration: none;
+}
+
+    .marca-enlace:hover,
+    .marca-enlace:focus {
+        color: #172033;
+    }
+
+.logo-institucional {
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.marca-institucional {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+}
+
+.marca-titulo {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.01rem;
+}
+
+.marca-colegio {
+    max-width: 275px;
+    margin-top: 0.2rem;
+    font-size: 0.73rem;
+    font-weight: 500;
+    line-height: 1.15;
+    white-space: normal;
+}
+
+.navegacion-principal,
+.navegacion-cuenta {
+    align-items: center;
+}
+
+    .navegacion-principal .nav-link,
+    .navegacion-cuenta .nav-link {
+        padding-right: 0.7rem;
+        padding-left: 0.7rem;
+        color: #343a40;
+        font-weight: 500;
+        border-radius: 0.375rem;
+    }
+
+        .navegacion-principal .nav-link:hover,
+        .navegacion-cuenta .nav-link:hover {
+            color: #0d6efd;
+            background-color: #f1f5f9;
+        }
+
+.dropdown-menu {
+    border-color: #dee2e6;
+    box-shadow: 0 0.5rem 1rem rgba(33, 37, 41, 0.12);
+}
+
+.dropdown-item {
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+}
+
+    .dropdown-item:active {
+        background-color: #0d6efd;
+    }
+
+.dropdown-header {
+    color: #6c757d;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04rem;
+    text-transform: uppercase;
+}
+
+/* Pie de página */
+
+.footer-institucional {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    min-height: 64px;
+    padding: 1rem 0;
+    color: #6c757d;
+    background-color: #f8f9fa;
+}
+
+.footer-contenido {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.footer-institucional a {
+    color: #495057;
+}
+
+    .footer-institucional a:hover {
+        color: #0d6efd;
+    }
+
+/* Formularios flotantes predeterminados */
+
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
+    text-align: start;
+}
+
+/* Adaptación para navegación colapsada */
+
+@media (max-width: 1199.98px) {
+    .navbar {
+        min-height: 70px;
+    }
+
+    .marca-enlace {
+        margin-right: 0;
+    }
+
+    .navbar-collapse {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .navegacion-principal,
+    .navegacion-cuenta {
+        align-items: stretch;
+    }
+
+        .navegacion-principal .nav-link,
+        .navegacion-cuenta .nav-link {
+            padding: 0.65rem 0.75rem;
+        }
+
+    .navegacion-cuenta {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .dropdown-menu {
+        border: 0;
+        box-shadow: none;
+    }
+}
+
+/* Adaptación para teléfonos */
+
+@media (max-width: 575.98px) {
+    body {
+        margin-bottom: 120px;
+    }
+
+    .logo-institucional {
+        width: 44px;
+        height: 44px;
+    }
+
+    .marca-enlace {
+        max-width: calc(100% - 65px);
+        gap: 0.5rem;
+    }
+
+    .marca-titulo {
+        font-size: 1.05rem;
+    }
+
+    .marca-colegio {
+        max-width: 205px;
+        font-size: 0.64rem;
+    }
+
+    .footer-contenido {
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .separador-footer {
+        display: none;
+    }
+}
+
+/* Pantalla de Inicio */
+
+.pagina-inicio {
+    padding-bottom: 2rem;
+}
+
+.inicio-identidad {
+    padding: 1.5rem 0 0.5rem;
+}
+
+.inicio-imagen-institucional {
+    display: block;
+    width: 100%;
+    max-width: 330px;
+    height: auto;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+.inicio-presentacion {
+    padding: 1.5rem 0 3.5rem;
+}
+
+.inicio-contenido {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.inicio-etiqueta {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    color: #0d6efd;
+    background-color: #eaf2ff;
+    border-radius: 50rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04rem;
+    text-transform: uppercase;
+}
+
+.inicio-titulo {
+    margin-bottom: 0.25rem;
+    color: #172033;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.inicio-subtitulo {
+    margin-bottom: 1.25rem;
+    color: #343a40;
+    font-size: clamp(1.25rem, 3vw, 1.8rem);
+    font-weight: 600;
+}
+
+.inicio-descripcion {
+    max-width: 700px;
+    margin: 0 auto;
+    color: #5f6875;
+    font-size: 1.08rem;
+    line-height: 1.7;
+}
+
+.inicio-acciones {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
+    .inicio-acciones .btn {
+        min-width: 175px;
+    }
+
+.inicio-seccion {
+    padding: 2rem 0;
+}
+
+.inicio-seccion-titulo {
+    margin-bottom: 0.5rem;
+    color: #172033;
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.tarjeta-paso {
+    border: 1px solid #e1e6ed;
+    border-radius: 0.85rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(33, 37, 41, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .tarjeta-paso:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.65rem 1.25rem rgba(33, 37, 41, 0.1);
+    }
+
+    .tarjeta-paso .card-body {
+        padding: 1.5rem;
+    }
+
+.numero-paso {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    color: #ffffff;
+    background-color: #0d6efd;
+    border-radius: 50%;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.inicio-aviso {
+    overflow: hidden;
+    color: #ffffff;
+    background-color: #17365d;
+    border: 0;
+    border-radius: 0.85rem;
+    box-shadow: 0 0.5rem 1rem rgba(23, 54, 93, 0.15);
+}
+
+    .inicio-aviso .btn-light {
+        color: #17365d;
+        font-weight: 600;
+    }
+
+.contacto-elemento {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    height: 100%;
+    padding: 1rem;
+    text-align: center;
+    background-color: #f8f9fa;
+    border-radius: 0.75rem;
+}
+
+.contacto-etiqueta {
+    margin-bottom: 0.35rem;
+    color: #6c757d;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04rem;
+    text-transform: uppercase;
+}
+
+.contacto-valor {
+    color: #212529;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.contacto-enlace {
+    text-decoration: none;
+}
+
+    .contacto-enlace:hover {
+        color: #0d6efd;
+        text-decoration: underline;
+    }
+
+/* Inicio en teléfonos */
+
+@media (max-width: 575.98px) {
+    .inicio-identidad {
+        padding-top: 0.75rem;
+    }
+
+    .inicio-imagen-institucional {
+        max-width: 260px;
+    }
+
+    .inicio-presentacion {
+        padding-top: 1rem;
+        padding-bottom: 2rem;
+    }
+
+    .inicio-descripcion {
+        font-size: 1rem;
+    }
+
+    .inicio-acciones {
+        flex-direction: column;
+    }
+
+        .inicio-acciones .btn {
+            width: 100%;
+        }
+
+    .inicio-seccion {
+        padding: 1.5rem 0;
+    }
+
+    .inicio-seccion-titulo {
+        font-size: 1.45rem;
+    }
+}
+
+/* Menú público */
+
+.pagina-menu {
+    max-width: 1200px;
+}
+
+.tarjeta-filtro-menu {
+    max-width: 760px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.tarjeta-menu {
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .tarjeta-menu:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.6rem 1.25rem rgba(33, 37, 41, 0.12) !important;
+    }
+
+.tarjeta-menu-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+}
+
+.menu-descripcion {
+    min-height: 90px;
+}
+
+.menu-etiqueta {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #6c757d;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04rem;
+    text-transform: uppercase;
+}
+
+.texto-menu {
+    color: #212529;
+    font-size: 1rem;
+    line-height: 1.55;
+    white-space: pre-line;
+}
+
+.menu-horario {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+}
+
+    .menu-horario .menu-etiqueta {
+        margin-bottom: 0;
+    }
+
+.menu-hora {
+    color: #212529;
+    font-size: 1.1rem;
+    white-space: nowrap;
+}
+
+.estado-vacio-simbolo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 1rem;
+    color: #6c757d;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+@media (max-width: 767.98px) {
+    .tarjeta-filtro-menu .btn {
+        width: 100%;
+    }
+
+    .menu-descripcion {
+        min-height: auto;
+    }
+
+    .tarjeta-menu:hover {
+        transform: none;
+    }
 }

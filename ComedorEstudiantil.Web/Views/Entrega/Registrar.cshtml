@@ -39,14 +39,22 @@
 }
 
 <div class="container py-4">
-    <h1 class="h3 mb-4">Registrar entrega</h1>
+    <h1 class="h3 mb-4">
+        Registrar entrega
+    </h1>
 
     @if (TempData["MensajeExito"] is not null)
     {
         <div class="alert alert-success alert-dismissible fade show"
              role="alert">
-            <strong>Operación realizada correctamente.</strong>
-            <div>@TempData["MensajeExito"]</div>
+
+            <strong>
+                Operación realizada correctamente.
+            </strong>
+
+            <div>
+                @TempData["MensajeExito"]
+            </div>
 
             <button type="button"
                     class="btn-close"
@@ -60,8 +68,14 @@
     {
         <div class="alert alert-warning alert-dismissible fade show"
              role="alert">
-            <strong>No se pudo completar la operación.</strong>
-            <div>@TempData["MensajeError"]</div>
+
+            <strong>
+                No se pudo completar la operación.
+            </strong>
+
+            <div>
+                @TempData["MensajeError"]
+            </div>
 
             <button type="button"
                     class="btn-close"
@@ -76,7 +90,9 @@
     {
         <div class="card border-warning shadow-sm mb-4">
             <div class="card-header bg-warning">
-                <strong>Confirmar repetición de comida</strong>
+                <strong>
+                    Confirmar repetición de comida
+                </strong>
             </div>
 
             <div class="card-body">
@@ -86,12 +102,16 @@
 
                 <p class="mb-1">
                     Cédula:
-                    <strong>@identificacionRepeticion</strong>
+                    <strong>
+                        @identificacionRepeticion
+                    </strong>
                 </p>
 
                 <p class="mb-1">
                     Repeticiones registradas:
-                    <strong>@cantidadRepeticiones</strong>
+                    <strong>
+                        @cantidadRepeticiones
+                    </strong>
                 </p>
 
                 <p class="mt-3 mb-3">
@@ -105,6 +125,7 @@
                           asp-action="RegistrarRepeticionCodigoBarras"
                           method="post"
                           class="formulario-repeticion d-inline">
+
                         @Html.AntiForgeryToken()
 
                         <input name="idEntrega"
@@ -117,7 +138,8 @@
 
                         <button type="submit"
                                 class="btn btn-warning">
-                            Confirmar repetición número @(cantidadRepeticiones + 1)
+                            Confirmar repetición número
+                            @(cantidadRepeticiones + 1)
                         </button>
                     </form>
 
@@ -134,6 +156,7 @@
                           asp-action="RegistrarRepeticionManual"
                           method="post"
                           class="formulario-repeticion d-inline">
+
                         @Html.AntiForgeryToken()
 
                         <input name="idEntrega"
@@ -153,7 +176,8 @@
 
                         <button type="submit"
                                 class="btn btn-warning">
-                            Confirmar repetición número @(cantidadRepeticiones + 1)
+                            Confirmar repetición número
+                            @(cantidadRepeticiones + 1)
                         </button>
                     </form>
 
@@ -171,7 +195,9 @@
 
     <div class="card shadow-sm mb-4">
         <div class="card-header">
-            <strong>Registrar con código de barras</strong>
+            <strong>
+                Registrar con código de barras
+            </strong>
         </div>
 
         <div class="card-body">
@@ -181,6 +207,7 @@
                       asp-action="RegistrarCodigoBarras"
                       method="post"
                       id="formularioCodigoBarras">
+
                     @Html.AntiForgeryToken()
 
                     <div class="mb-3">
@@ -192,6 +219,7 @@
                                 id="selectorMenu"
                                 class="form-select"
                                 required>
+
                             <option value="">
                                 Seleccione el menú
                             </option>
@@ -236,7 +264,8 @@
                         </div>
 
                         <div class="form-text">
-                            Seleccione el menú y escanee el código. El lector enviará el código automáticamente.
+                            Seleccione el menú y escanee el código.
+                            El lector enviará el código automáticamente.
                         </div>
                     </div>
                 </form>
@@ -252,13 +281,16 @@
 
     <div class="card shadow-sm mb-4">
         <div class="card-header">
-            <strong>Registrar manualmente por cédula</strong>
+            <strong>
+                Registrar manualmente por cédula
+            </strong>
         </div>
 
         <div class="card-body">
             <form asp-controller="Entrega"
                   asp-action="Registrar"
                   method="get">
+
                 @if (Model.IdMenuSeleccionado.HasValue)
                 {
                     <input name="idMenu"
@@ -287,7 +319,8 @@
 
     @if (Model.BusquedaRealizada)
     {
-        if (string.IsNullOrWhiteSpace(Model.NombreUsuario))
+        if (string.IsNullOrWhiteSpace(
+        Model.NombreUsuario))
         {
             <div class="alert alert-warning">
                 @(Model.MensajeBusqueda ??
@@ -318,41 +351,29 @@
 
                                     <div class="text-muted small mb-3">
                                         Solicitud:
-                                        @solicitud.FechaHoraSolicitud.ToString("dd/MM/yyyy HH:mm")
+                                        @solicitud.FechaHoraSolicitud.ToString(
+                                                 "dd/MM/yyyy HH:mm")
                                     </div>
 
                                     @if (!solicitud.Entregada)
                                     {
                                         <div class="alert alert-info py-2">
-                                            Esta comida se encuentra pendiente de entrega.
+                                            Esta comida se encuentra
+                                            pendiente de entrega.
                                         </div>
 
-                                        <form asp-controller="Entrega"
-                                              asp-action="Registrar"
-                                              method="post">
-                                            @Html.AntiForgeryToken()
-
-                                            <input name="idSolicitud"
-                                                   value="@solicitud.IdSolicitud"
-                                                   type="hidden" />
-
-                                            <input name="identificacion"
-                                                   value="@Model.Identificacion"
-                                                   type="hidden" />
-
-                                            @if (Model.IdMenuSeleccionado.HasValue)
-                                            {
-                                                <input name="idMenu"
-                                                       value="@Model.IdMenuSeleccionado.Value"
-                                                       type="hidden" />
-                                            }
-
-                                            <button type="submit"
-                                                    class="btn btn-success"
-                                                    onclick="return confirm('¿Confirma la entrega?');">
-                                                Registrar entrega
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                                class="btn btn-success boton-confirmar-entrega"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalConfirmarEntrega"
+                                                data-id-solicitud="@solicitud.IdSolicitud"
+                                                data-identificacion="@Model.Identificacion"
+                                                data-id-menu="@Model.IdMenuSeleccionado"
+                                                data-nombre-usuario="@Model.NombreUsuario"
+                                                data-tipo-comida="@solicitud.TipoComida"
+                                                data-descripcion-menu="@solicitud.DescripcionMenu">
+                                            Registrar entrega
+                                        </button>
                                     }
                                     else if (solicitud.IdEntrega.HasValue)
                                     {
@@ -363,13 +384,16 @@
 
                                             <div>
                                                 Repeticiones registradas:
-                                                <strong>@solicitud.CantidadRepeticiones</strong>
+                                                <strong>
+                                                    @solicitud.CantidadRepeticiones
+                                                </strong>
                                             </div>
                                         </div>
 
                                         <form asp-controller="Entrega"
                                               asp-action="PrepararRepeticionManual"
                                               method="post">
+
                                             @Html.AntiForgeryToken()
 
                                             <input name="idEntrega"
@@ -389,7 +413,8 @@
 
                                             <button type="submit"
                                                     class="btn btn-warning">
-                                                Solicitar repetición número @(solicitud.CantidadRepeticiones + 1)
+                                                Solicitar repetición número
+                                                @(solicitud.CantidadRepeticiones + 1)
                                             </button>
                                         </form>
                                     }
@@ -410,6 +435,99 @@
     }
 </div>
 
+<!-- Modal para confirmar entrega manual -->
+<div class="modal fade"
+     id="modalConfirmarEntrega"
+     tabindex="-1"
+     aria-labelledby="tituloModalConfirmarEntrega"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form asp-controller="Entrega"
+                  asp-action="Registrar"
+                  method="post"
+                  id="formularioConfirmarEntrega">
+
+                @Html.AntiForgeryToken()
+
+                <input id="idSolicitudConfirmarEntrega"
+                       name="idSolicitud"
+                       type="hidden" />
+
+                <input id="identificacionConfirmarEntrega"
+                       name="identificacion"
+                       type="hidden" />
+
+                <input id="idMenuConfirmarEntrega"
+                       name="idMenu"
+                       type="hidden" />
+
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5"
+                        id="tituloModalConfirmarEntrega">
+                        Confirmar entrega
+                    </h2>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        ¿Confirma que se realizará la entrega
+                        de esta comida?
+                    </p>
+
+                    <div class="alert alert-light border mb-0">
+                        <div class="mb-2">
+                            <strong>Persona:</strong>
+
+                            <span id="nombreUsuarioConfirmarEntrega"></span>
+                        </div>
+
+                        <div class="mb-2">
+                            <strong>Identificación:</strong>
+
+                            <span id="textoIdentificacionConfirmarEntrega"></span>
+                        </div>
+
+                        <div class="mb-2">
+                            <strong>Tipo de comida:</strong>
+
+                            <span id="tipoComidaConfirmarEntrega"></span>
+                        </div>
+
+                        <div>
+                            <strong>Menú:</strong>
+
+                            <span id="descripcionMenuConfirmarEntrega"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Volver
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-success"
+                            id="botonRegistrarEntregaModal">
+                        Confirmar entrega
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts
 {
     <script>
@@ -418,52 +536,161 @@
         @(confirmarRepeticion ? "true" : "false");
 
             const campoCodigo =
-                document.getElementById("campoCodigoBarras");
+                document.getElementById(
+                    "campoCodigoBarras");
 
             const selectorMenu =
-                document.getElementById("selectorMenu");
+                document.getElementById(
+                    "selectorMenu");
 
             const formularioCodigo =
-                document.getElementById("formularioCodigoBarras");
+                document.getElementById(
+                    "formularioCodigoBarras");
 
             if (campoCodigo && selectorMenu) {
-                if (selectorMenu.value && !hayConfirmacion) {
+                if (selectorMenu.value &&
+                    !hayConfirmacion) {
                     campoCodigo.focus();
                 }
 
-                selectorMenu.addEventListener("change", function () {
-                    if (selectorMenu.value) {
-                        campoCodigo.focus();
-                    }
-                });
+                selectorMenu.addEventListener(
+                    "change",
+                    function () {
+                        if (selectorMenu.value) {
+                            campoCodigo.focus();
+                        }
+                    });
             }
 
             if (formularioCodigo) {
-                formularioCodigo.addEventListener("submit", function () {
-                    const boton = formularioCodigo.querySelector(
-                        "button[type='submit']"
-                    );
-
-                    if (boton) {
-                        boton.disabled = true;
-                        boton.textContent = "Registrando...";
-                    }
-                });
-            }
-
-            document.querySelectorAll(".formulario-repeticion")
-                .forEach(function (formulario) {
-                    formulario.addEventListener("submit", function () {
-                        const boton = formulario.querySelector(
-                            "button[type='submit']"
-                        );
+                formularioCodigo.addEventListener(
+                    "submit",
+                    function () {
+                        const boton =
+                            formularioCodigo.querySelector(
+                                "button[type='submit']");
 
                         if (boton) {
                             boton.disabled = true;
-                            boton.textContent = "Registrando...";
+                            boton.textContent =
+                                "Registrando...";
                         }
                     });
+            }
+
+            document.querySelectorAll(
+                ".formulario-repeticion")
+                .forEach(function (formulario) {
+                    formulario.addEventListener(
+                        "submit",
+                        function () {
+                            const boton =
+                                formulario.querySelector(
+                                    "button[type='submit']");
+
+                            if (boton) {
+                                boton.disabled = true;
+                                boton.textContent =
+                                    "Registrando...";
+                            }
+                        });
                 });
+
+            const modalEntrega =
+                document.getElementById(
+                    "modalConfirmarEntrega");
+
+            const campoIdSolicitud =
+                document.getElementById(
+                    "idSolicitudConfirmarEntrega");
+
+            const campoIdentificacion =
+                document.getElementById(
+                    "identificacionConfirmarEntrega");
+
+            const campoIdMenu =
+                document.getElementById(
+                    "idMenuConfirmarEntrega");
+
+            const textoNombreUsuario =
+                document.getElementById(
+                    "nombreUsuarioConfirmarEntrega");
+
+            const textoIdentificacion =
+                document.getElementById(
+                    "textoIdentificacionConfirmarEntrega");
+
+            const textoTipoComida =
+                document.getElementById(
+                    "tipoComidaConfirmarEntrega");
+
+            const textoDescripcionMenu =
+                document.getElementById(
+                    "descripcionMenuConfirmarEntrega");
+
+            const formularioConfirmarEntrega =
+                document.getElementById(
+                    "formularioConfirmarEntrega");
+
+            const botonRegistrarEntrega =
+                document.getElementById(
+                    "botonRegistrarEntregaModal");
+
+            if (modalEntrega &&
+                campoIdSolicitud &&
+                campoIdentificacion &&
+                campoIdMenu &&
+                textoNombreUsuario &&
+                textoIdentificacion &&
+                textoTipoComida &&
+                textoDescripcionMenu) {
+
+                modalEntrega.addEventListener(
+                    "show.bs.modal",
+                    function (event) {
+                        const boton =
+                            event.relatedTarget;
+
+                        if (!boton) {
+                            return;
+                        }
+
+                        campoIdSolicitud.value =
+                            boton.dataset.idSolicitud ?? "";
+
+                        campoIdentificacion.value =
+                            boton.dataset.identificacion ?? "";
+
+                        campoIdMenu.value =
+                            boton.dataset.idMenu ?? "";
+
+                        textoNombreUsuario.textContent =
+                            boton.dataset.nombreUsuario ?? "";
+
+                        textoIdentificacion.textContent =
+                            boton.dataset.identificacion ?? "";
+
+                        textoTipoComida.textContent =
+                            boton.dataset.tipoComida ?? "";
+
+                        textoDescripcionMenu.textContent =
+                            boton.dataset.descripcionMenu ?? "";
+                    });
+            }
+
+            if (formularioConfirmarEntrega &&
+                botonRegistrarEntrega) {
+
+                formularioConfirmarEntrega.addEventListener(
+                    "submit",
+                    function () {
+                        botonRegistrarEntrega.disabled =
+                            true;
+
+                        botonRegistrarEntrega.textContent =
+                            "Registrando...";
+                    });
+            }
         });
     </script>
 }

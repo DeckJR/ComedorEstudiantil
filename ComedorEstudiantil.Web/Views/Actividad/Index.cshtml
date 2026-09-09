@@ -5,9 +5,12 @@
 }
 
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
-            <h1 class="h3 mb-1">Actividades</h1>
+            <h1 class="h3 mb-1">
+                Actividades
+            </h1>
+
             <p class="text-muted mb-0">
                 Administración de actividades especiales del colegio.
             </p>
@@ -24,6 +27,7 @@
     {
         <div class="alert alert-success alert-dismissible fade show"
              role="alert">
+
             @TempData["MensajeExito"]
 
             <button type="button"
@@ -38,6 +42,7 @@
     {
         <div class="alert alert-danger alert-dismissible fade show"
              role="alert">
+
             @TempData["MensajeError"]
 
             <button type="button"
@@ -58,7 +63,9 @@
                             <th>Nombre</th>
                             <th>Descripción</th>
                             <th>Estado</th>
-                            <th class="text-end">Acciones</th>
+                            <th class="text-end">
+                                Acciones
+                            </th>
                         </tr>
                     </thead>
 
@@ -66,9 +73,19 @@
                         @foreach (var actividad in Model)
                         {
                             <tr>
-                                <td>@actividad.Fecha.ToString("dd/MM/yyyy")</td>
-                                <td>@actividad.Nombre</td>
-                                <td>@(actividad.Descripcion ?? "Sin descripción")</td>
+                                <td>
+                                    @actividad.Fecha.ToString("dd/MM/yyyy")
+                                </td>
+
+                                <td>
+                                    @actividad.Nombre
+                                </td>
+
+                                <td>
+                                    @(actividad.Descripcion ??
+                                        "Sin descripción")
+                                </td>
+
                                 <td>
                                     @if (actividad.Activo)
                                     {
@@ -83,6 +100,7 @@
                                         </span>
                                     }
                                 </td>
+
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-2">
                                         <a asp-controller="Actividad"
@@ -92,29 +110,30 @@
                                             Editar
                                         </a>
 
-                                        <form asp-controller="Actividad"
-                                              asp-action="CambiarEstado"
-                                              asp-route-id="@actividad.IdActividad"
-                                              method="post">
-                                            @Html.AntiForgeryToken()
-
-                                            @if (actividad.Activo)
-                                            {
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-outline-danger"
-                                                        onclick="return confirm('¿Desea desactivar esta actividad?');">
-                                                    Desactivar
-                                                </button>
-                                            }
-                                            else
-                                            {
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-outline-success"
-                                                        onclick="return confirm('¿Desea activar esta actividad?');">
-                                                    Activar
-                                                </button>
-                                            }
-                                        </form>
+                                        @if (actividad.Activo)
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger boton-cambiar-estado"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalCambiarEstadoActividad"
+                                                    data-id-actividad="@actividad.IdActividad"
+                                                    data-nombre-actividad="@actividad.Nombre"
+                                                    data-esta-activa="true">
+                                                Desactivar
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-success boton-cambiar-estado"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalCambiarEstadoActividad"
+                                                    data-id-actividad="@actividad.IdActividad"
+                                                    data-nombre-actividad="@actividad.Nombre"
+                                                    data-esta-activa="false">
+                                                Activar
+                                            </button>
+                                        }
                                     </div>
                                 </td>
                             </tr>
@@ -135,3 +154,146 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para activar o desactivar -->
+<div class="modal fade"
+     id="modalCambiarEstadoActividad"
+     tabindex="-1"
+     aria-labelledby="tituloModalCambiarEstadoActividad"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form asp-controller="Actividad"
+                  asp-action="CambiarEstado"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input id="idActividadCambiarEstado"
+                       name="id"
+                       type="hidden" />
+
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5"
+                        id="tituloModalCambiarEstadoActividad">
+                        Cambiar estado de la actividad
+                    </h2>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p id="mensajeCambiarEstadoActividad"
+                       class="mb-3">
+                    </p>
+
+                    <div class="alert alert-light border mb-0">
+                        <strong>Actividad:</strong>
+
+                        <span id="nombreActividadCambiarEstado"></span>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Volver
+                    </button>
+
+                    <button id="botonConfirmarEstadoActividad"
+                            type="submit"
+                            class="btn">
+                        Confirmar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal =
+                document.getElementById(
+                    "modalCambiarEstadoActividad");
+
+            const campoId =
+                document.getElementById(
+                    "idActividadCambiarEstado");
+
+            const campoNombre =
+                document.getElementById(
+                    "nombreActividadCambiarEstado");
+
+            const mensaje =
+                document.getElementById(
+                    "mensajeCambiarEstadoActividad");
+
+            const botonConfirmar =
+                document.getElementById(
+                    "botonConfirmarEstadoActividad");
+
+            if (!modal ||
+                !campoId ||
+                !campoNombre ||
+                !mensaje ||
+                !botonConfirmar) {
+                return;
+            }
+
+            modal.addEventListener(
+                "show.bs.modal",
+                function (event) {
+                    const boton = event.relatedTarget;
+
+                    if (!boton) {
+                        return;
+                    }
+
+                    const idActividad =
+                        boton.dataset.idActividad ?? "";
+
+                    const nombreActividad =
+                        boton.dataset.nombreActividad ?? "";
+
+                    const estaActiva =
+                        boton.dataset.estaActiva === "true";
+
+                    campoId.value =
+                        idActividad;
+
+                    campoNombre.textContent =
+                        nombreActividad;
+
+                    if (estaActiva) {
+                        mensaje.textContent =
+                            "¿Desea desactivar esta actividad?";
+
+                        botonConfirmar.textContent =
+                            "Confirmar desactivación";
+
+                        botonConfirmar.className =
+                            "btn btn-danger";
+                    }
+                    else {
+                        mensaje.textContent =
+                            "¿Desea activar esta actividad?";
+
+                        botonConfirmar.textContent =
+                            "Confirmar activación";
+
+                        botonConfirmar.className =
+                            "btn btn-success";
+                    }
+                });
+        });
+    </script>
+}

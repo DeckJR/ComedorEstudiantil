@@ -6,6 +6,12 @@ namespace ComedorEstudiantil.Web.Services
     public class ReporteExcelService :
         IReporteExcelService
     {
+        private const string NombreColegio =
+            "Colegio Gregorio José Ramírez Castro";
+
+        private const string NombreSistema =
+            "Sistema del Comedor";
+
         public byte[] GenerarSolicitudes(
             ReporteGeneralDTO reporte)
         {
@@ -111,8 +117,9 @@ namespace ComedorEstudiantil.Web.Services
 
             return GuardarLibro(libro);
         }
+
         public byte[] GenerarEntregas(
-    ReporteGeneralDTO reporte)
+            ReporteGeneralDTO reporte)
         {
             using var libro = new XLWorkbook();
 
@@ -126,27 +133,30 @@ namespace ComedorEstudiantil.Web.Services
                 14);
 
             hoja.Cell(3, 1).Value =
-                $"Entregas iniciales: {reporte.TotalEntregasIniciales} | " +
-                $"Repeticiones: {reporte.TotalRepeticiones} | " +
-                $"Total de platos servidos: {reporte.TotalPlatosServidos}";
+                $"Entregas iniciales: " +
+                $"{reporte.TotalEntregasIniciales} | " +
+                $"Repeticiones: " +
+                $"{reporte.TotalRepeticiones} | " +
+                $"Total de platos servidos: " +
+                $"{reporte.TotalPlatosServidos}";
 
             string[] encabezados =
             {
-        "Fecha",
-        "Tipo de comida",
-        "Menú",
-        "Identificación",
-        "Usuario",
-        "Rol",
-        "Beneficio",
-        "Grupo",
-        "Fecha y hora de entrega",
-        "Método de entrega",
-        "Registrado por",
-        "Entrega inicial",
-        "Repeticiones",
-        "Platos consumidos"
-    };
+                "Fecha",
+                "Tipo de comida",
+                "Menú",
+                "Identificación",
+                "Usuario",
+                "Rol",
+                "Beneficio",
+                "Grupo",
+                "Fecha y hora de entrega",
+                "Método de entrega",
+                "Registrado por",
+                "Entrega inicial",
+                "Repeticiones",
+                "Platos consumidos"
+            };
 
             CrearEncabezadosTabla(
                 hoja,
@@ -191,7 +201,8 @@ namespace ComedorEstudiantil.Web.Services
                 hoja.Cell(fila, 11).Value =
                     entrega.EntregadoPor;
 
-                hoja.Cell(fila, 12).Value = 1;
+                hoja.Cell(fila, 12).Value =
+                    1;
 
                 hoja.Cell(fila, 13).Value =
                     entrega.CantidadRepeticiones;
@@ -230,11 +241,18 @@ namespace ComedorEstudiantil.Web.Services
                     cantidadColumnas);
 
             tituloRango.Merge();
-            tituloRango.Value =
-                $"Comedor Estudiantil - {titulo}";
 
-            tituloRango.Style.Font.Bold = true;
-            tituloRango.Style.Font.FontSize = 16;
+            tituloRango.Value =
+                $"{NombreColegio}\n" +
+                $"{NombreSistema}\n" +
+                $"{titulo}";
+
+            tituloRango.Style.Font.Bold =
+                true;
+
+            tituloRango.Style.Font.FontSize =
+                15;
+
             tituloRango.Style.Font.FontColor =
                 XLColor.White;
 
@@ -247,7 +265,10 @@ namespace ComedorEstudiantil.Web.Services
             tituloRango.Style.Alignment.Vertical =
                 XLAlignmentVerticalValues.Center;
 
-            hoja.Row(1).Height = 28;
+            tituloRango.Style.Alignment.WrapText =
+                true;
+
+            hoja.Row(1).Height = 58;
 
             IXLRange periodoRango =
                 hoja.Range(
@@ -273,14 +294,25 @@ namespace ComedorEstudiantil.Web.Services
                 };
 
             periodoRango.Value =
-                $"Periodo: {reporte.Filtro.FechaInicio:dd/MM/yyyy} al " +
+                $"Periodo: " +
+                $"{reporte.Filtro.FechaInicio:dd/MM/yyyy} al " +
                 $"{reporte.Filtro.FechaFin:dd/MM/yyyy} | " +
                 $"Tipo de comida: {filtroTipo} | " +
                 $"Estado: {filtroEstado}";
 
-            periodoRango.Style.Font.Bold = true;
+            periodoRango.Style.Font.Bold =
+                true;
+
             periodoRango.Style.Alignment.Horizontal =
                 XLAlignmentHorizontalValues.Center;
+
+            periodoRango.Style.Alignment.Vertical =
+                XLAlignmentVerticalValues.Center;
+
+            periodoRango.Style.Alignment.WrapText =
+                true;
+
+            hoja.Row(2).Height = 24;
 
             IXLRange resumenRango =
                 hoja.Range(
@@ -290,13 +322,23 @@ namespace ComedorEstudiantil.Web.Services
                     cantidadColumnas);
 
             resumenRango.Merge();
-            resumenRango.Style.Font.Bold = true;
+
+            resumenRango.Style.Font.Bold =
+                true;
 
             resumenRango.Style.Fill.BackgroundColor =
                 XLColor.FromHtml("#E9ECEF");
 
             resumenRango.Style.Alignment.Horizontal =
                 XLAlignmentHorizontalValues.Center;
+
+            resumenRango.Style.Alignment.Vertical =
+                XLAlignmentVerticalValues.Center;
+
+            resumenRango.Style.Alignment.WrapText =
+                true;
+
+            hoja.Row(3).Height = 24;
 
             IXLRange generadoRango =
                 hoja.Range(
@@ -306,13 +348,16 @@ namespace ComedorEstudiantil.Web.Services
                     cantidadColumnas);
 
             generadoRango.Merge();
+
             generadoRango.Value =
-                $"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}";
+                $"Generado: " +
+                $"{DateTime.Now:dd/MM/yyyy HH:mm}";
 
             generadoRango.Style.Alignment.Horizontal =
                 XLAlignmentHorizontalValues.Right;
 
-            generadoRango.Style.Font.Italic = true;
+            generadoRango.Style.Font.Italic =
+                true;
         }
 
         private static void CrearEncabezadosTabla(
@@ -323,7 +368,9 @@ namespace ComedorEstudiantil.Web.Services
                  columna < encabezados.Count;
                  columna++)
             {
-                hoja.Cell(5, columna + 1).Value =
+                hoja.Cell(
+                    5,
+                    columna + 1).Value =
                     encabezados[columna];
             }
 
@@ -334,7 +381,9 @@ namespace ComedorEstudiantil.Web.Services
                     5,
                     encabezados.Count);
 
-            rango.Style.Font.Bold = true;
+            rango.Style.Font.Bold =
+                true;
+
             rango.Style.Font.FontColor =
                 XLColor.White;
 
@@ -362,7 +411,9 @@ namespace ComedorEstudiantil.Web.Services
             int ultimaColumna)
         {
             int filaFinal =
-                Math.Max(ultimaFila, 5);
+                Math.Max(
+                    ultimaFila,
+                    5);
 
             IXLRange tabla =
                 hoja.Range(
@@ -386,7 +437,9 @@ namespace ComedorEstudiantil.Web.Services
             tabla.Style.Alignment.Vertical =
                 XLAlignmentVerticalValues.Center;
 
-            tabla.Style.Alignment.WrapText = true;
+            tabla.Style.Alignment.WrapText =
+                true;
+
             tabla.SetAutoFilter();
 
             hoja.SheetView.FreezeRows(5);
@@ -410,7 +463,8 @@ namespace ComedorEstudiantil.Web.Services
         private static byte[] GuardarLibro(
             XLWorkbook libro)
         {
-            using var flujo = new MemoryStream();
+            using var flujo =
+                new MemoryStream();
 
             libro.SaveAs(flujo);
 

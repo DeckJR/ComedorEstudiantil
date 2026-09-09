@@ -1,8 +1,243 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
+
+    bool estaAutenticado =
+        User.Identity?.IsAuthenticated == true;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="pagina-inicio">
+
+    <!-- Imagen institucional -->
+    <section class="inicio-identidad text-center">
+        <img src="~/images/informacion-colegio.png"
+             alt="Información de contacto del Colegio Gregorio José Ramírez Castro"
+             class="inicio-imagen-institucional" />
+    </section>
+
+    <!-- Presentación -->
+    <section class="inicio-presentacion text-center">
+        <div class="inicio-contenido">
+            <span class="inicio-etiqueta">
+                Sistema institucional
+            </span>
+
+            <h1 class="inicio-titulo">
+                Comedor
+            </h1>
+
+            <h2 class="inicio-subtitulo">
+                Colegio Gregorio José Ramírez Castro
+            </h2>
+
+            <p class="inicio-descripcion">
+                Bienvenido al sistema del comedor institucional.
+                Desde esta plataforma puede consultar los menús
+                disponibles, realizar solicitudes de comida y dar
+                seguimiento a las solicitudes registradas.
+            </p>
+
+            <div class="inicio-acciones">
+                <a asp-controller="Menu"
+                   asp-action="Index"
+                   class="btn btn-primary btn-lg">
+                    Consultar menú
+                </a>
+
+                @if (estaAutenticado)
+                {
+                    <a asp-controller="Solicitud"
+                       asp-action="MisSolicitudes"
+                       class="btn btn-outline-primary btn-lg">
+                        Mis solicitudes
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Cuenta"
+                       asp-action="IniciarSesion"
+                       class="btn btn-outline-primary btn-lg">
+                        Iniciar sesión
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Explicación -->
+    <section class="inicio-seccion">
+        <div class="text-center mb-4">
+            <h2 class="inicio-seccion-titulo">
+                ¿Cómo funciona?
+            </h2>
+
+            <p class="text-muted mb-0">
+                Utilice el sistema siguiendo estos pasos.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-xl-3">
+                <article class="card tarjeta-paso h-100">
+                    <div class="card-body">
+                        <span class="numero-paso">
+                            1
+                        </span>
+
+                        <h3 class="h5 mt-3">
+                            Consulte el menú
+                        </h3>
+
+                        <p class="text-muted mb-0">
+                            Revise los alimentos disponibles para
+                            la fecha y el tipo de comida que desea.
+                        </p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <article class="card tarjeta-paso h-100">
+                    <div class="card-body">
+                        <span class="numero-paso">
+                            2
+                        </span>
+
+                        <h3 class="h5 mt-3">
+                            Inicie sesión
+                        </h3>
+
+                        <p class="text-muted mb-0">
+                            Ingrese con la cuenta que le fue
+                            asignada por la institución.
+                        </p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <article class="card tarjeta-paso h-100">
+                    <div class="card-body">
+                        <span class="numero-paso">
+                            3
+                        </span>
+
+                        <h3 class="h5 mt-3">
+                            Registre la solicitud
+                        </h3>
+
+                        <p class="text-muted mb-0">
+                            Solicite la comida antes de que
+                            finalice la hora límite indicada.
+                        </p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <article class="card tarjeta-paso h-100">
+                    <div class="card-body">
+                        <span class="numero-paso">
+                            4
+                        </span>
+
+                        <h3 class="h5 mt-3">
+                            Retire la comida
+                        </h3>
+
+                        <p class="text-muted mb-0">
+                            Presente su código de barras cuando
+                            se realice la entrega en el comedor.
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Información importante -->
+    <section class="inicio-seccion">
+        <div class="card inicio-aviso">
+            <div class="card-body p-4">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-8">
+                        <h2 class="h4 mb-2">
+                            Información importante
+                        </h2>
+
+                        <p class="mb-0">
+                            Las solicitudes deben registrarse antes
+                            de la hora límite correspondiente. Consulte
+                            siempre la disponibilidad y el horario
+                            mostrado en cada menú.
+                        </p>
+                    </div>
+
+                    <div class="col-lg-4 text-lg-end">
+                        <a asp-controller="Menu"
+                           asp-action="Index"
+                           class="btn btn-light">
+                            Ver menús disponibles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacto -->
+    <section class="inicio-seccion">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <h2 class="inicio-seccion-titulo">
+                        Información de contacto
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Colegio Gregorio José Ramírez Castro
+                    </p>
+                </div>
+
+                <div class="row justify-content-center g-4">
+                    <div class="col-md-4">
+                        <div class="contacto-elemento">
+                            <span class="contacto-etiqueta">
+                                Ubicación
+                            </span>
+
+                            <span class="contacto-valor">
+                                Alajuela, Costa Rica
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="contacto-elemento">
+                            <span class="contacto-etiqueta">
+                                Teléfono
+                            </span>
+
+                            <a href="tel:+50684300272"
+                               class="contacto-valor contacto-enlace">
+                                8430-0272
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="contacto-elemento">
+                            <span class="contacto-etiqueta">
+                                Correo electrónico
+                            </span>
+
+                            <a href="mailto:lic.gregoriojoseramirez@mep.go.cr"
+                               class="contacto-valor contacto-enlace">
+                                lic.gregoriojoseramirez@mep.go.cr
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>

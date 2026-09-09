@@ -2,85 +2,173 @@
 
 @{
     ViewData["Title"] = "Menú";
-    string returnUrl = Context.Request.Path + Context.Request.QueryString;
+
+    string returnUrl =
+        Context.Request.Path +
+        Context.Request.QueryString;
 }
 
-<div class="container py-4">
+<div class="container py-4 pagina-menu">
+
+    <!-- Encabezado -->
     <div class="text-center mb-4">
-        <h1 class="h3">Menú del comedor</h1>
-        <p class="text-muted">
-            Consulte y solicite los alimentos disponibles.
+        <span class="badge text-bg-light border mb-2">
+            Servicio del comedor
+        </span>
+
+        <h1 class="h2 mb-2">
+            Menú disponible
+        </h1>
+
+        <p class="text-muted mb-0">
+            Consulte los alimentos disponibles y registre
+            su solicitud antes de la hora límite.
         </p>
     </div>
 
-    @if (TempData["MensajeExito"] is not null)
-    {
-        <div class="alert alert-success">
-            @TempData["MensajeExito"]
-        </div>
-    }
+    <!-- Mensajes -->
+    <div aria-live="polite">
+        @if (TempData["MensajeExito"] is not null)
+        {
+            <div class="alert alert-success alert-dismissible fade show"
+                 role="alert">
 
-    @if (TempData["MensajeError"] is not null)
-    {
-        <div class="alert alert-danger">
-            @TempData["MensajeError"]
-        </div>
-    }
+                @TempData["MensajeExito"]
 
-    <form asp-controller="Menu"
-          asp-action="Index"
-          method="get"
-          class="row justify-content-center mb-4">
-        <div class="col-md-5">
-            <label for="fecha" class="form-label">
-                Fecha
-            </label>
-
-            <div class="input-group">
-                <input id="fecha"
-                       name="fecha"
-                       type="date"
-                       class="form-control"
-                       value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
-
-                <button type="submit"
-                        class="btn btn-primary">
-                    Consultar
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Cerrar">
                 </button>
             </div>
+        }
+
+        @if (TempData["MensajeError"] is not null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show"
+                 role="alert">
+
+                @TempData["MensajeError"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Cerrar">
+                </button>
+            </div>
+        }
+    </div>
+
+    <!-- Selector de fecha -->
+    <div class="card shadow-sm mb-4 tarjeta-filtro-menu">
+        <div class="card-body">
+            <form asp-controller="Menu"
+                  asp-action="Index"
+                  method="get"
+                  class="row justify-content-center align-items-end g-3">
+
+                <div class="col-md-6 col-lg-5">
+                    <label for="fecha"
+                           class="form-label fw-semibold">
+                        Fecha del menú
+                    </label>
+
+                    <input id="fecha"
+                           name="fecha"
+                           type="date"
+                           class="form-control"
+                           value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <div class="col-md-auto">
+                    <button type="submit"
+                            class="btn btn-primary px-4">
+                        Consultar
+                    </button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
+
+    <!-- Fecha consultada -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h2 class="h5 mb-0">
+            Menús del
+            @Model.FechaSeleccionada.ToString("dd/MM/yyyy")
+        </h2>
+
+        @if (Model.Menus.Any())
+        {
+            <span class="badge text-bg-secondary">
+                @Model.Menus.Count
+                @(Model.Menus.Count == 1 ? "menú" : "menús")
+            </span>
+        }
+    </div>
 
     @if (Model.Menus.Any())
     {
         <div class="row g-4">
             @foreach (var menu in Model.Menus)
             {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-header bg-primary text-white">
-                            <h2 class="h5 mb-0">
-                                @menu.TipoComida
-                            </h2>
+                <div class="col-md-6 col-xl-4">
+                    <article class="card tarjeta-menu h-100 shadow-sm">
+
+                        <!-- Tipo de comida -->
+                        <div class="card-header bg-primary text-white tarjeta-menu-encabezado">
+                            <div>
+                                <span class="d-block small opacity-75">
+                                    Tipo de comida
+                                </span>
+
+                                <h3 class="h5 mb-0">
+                                    @menu.TipoComida
+                                </h3>
+                            </div>
+
+                            <span class="badge bg-light text-primary">
+                                @Model.FechaSeleccionada.ToString("dd/MM")
+                            </span>
                         </div>
 
                         <div class="card-body d-flex flex-column">
-                            <p style="white-space: pre-line;">
-                                @menu.Descripcion
-                            </p>
 
-                            @if (!string.IsNullOrWhiteSpace(menu.Actividad))
+                            <!-- Descripción -->
+                            <div class="menu-descripcion mb-3">
+                                <span class="menu-etiqueta">
+                                    Menú
+                                </span>
+
+                                <p class="mb-0 texto-menu">
+                                    @menu.Descripcion
+                                </p>
+                            </div>
+
+                            <!-- Actividad -->
+                            @if (!string.IsNullOrWhiteSpace(
+                           menu.Actividad))
                             {
-                                <div class="alert alert-info py-2">
-                                    Actividad: @menu.Actividad
+                                <div class="alert alert-info py-2 px-3 mb-3">
+                                    <span class="fw-semibold">
+                                        Actividad:
+                                    </span>
+
+                                    @menu.Actividad
                                 </div>
                             }
 
-                            <div class="text-muted small mb-3">
-                                Hora límite:
-                                @menu.HoraLimiteMarcar.ToString("HH:mm")
+                            <!-- Horario -->
+                            <div class="menu-horario mb-3">
+                                <span class="menu-etiqueta">
+                                    Hora límite para solicitar
+                                </span>
+
+                                <strong class="menu-hora">
+                                    @menu.HoraLimiteMarcar.ToString("HH:mm")
+                                </strong>
                             </div>
 
+                            <!-- Acciones -->
                             <div class="mt-auto">
                                 @if (User.Identity?.IsAuthenticated != true)
                                 {
@@ -92,8 +180,16 @@
                                 }
                                 else if (menu.SolicitudActiva)
                                 {
-                                    <div class="alert alert-success py-2">
-                                        Solicitud registrada
+                                    <div class="alert alert-success py-2 px-3 mb-3"
+                                         role="status">
+                                        <strong>
+                                            Solicitud registrada
+                                        </strong>
+
+                                        <div class="small">
+                                            Su solicitud para este menú
+                                            se encuentra activa.
+                                        </div>
                                     </div>
 
                                     @if (menu.PuedeSolicitar &&
@@ -106,6 +202,7 @@
                                                 data-id-solicitud="@menu.IdSolicitud"
                                                 data-tipo-comida="@menu.TipoComida"
                                                 data-descripcion="@menu.Descripcion">
+
                                             Cancelar solicitud
                                         </button>
                                     }
@@ -115,6 +212,7 @@
                                     <form asp-controller="Solicitud"
                                           asp-action="Solicitar"
                                           method="post">
+
                                         @Html.AntiForgeryToken()
 
                                         <input name="idMenu"
@@ -129,7 +227,9 @@
                                 }
                                 else
                                 {
-                                    <div class="alert alert-secondary py-2">
+                                    <div class="alert alert-secondary py-2 px-3 mb-0"
+                                         role="status">
+
                                         @menu.MensajeDisponibilidad
                                     </div>
                                 }
@@ -143,34 +243,59 @@
                                        asp-action="RegistrarParaOtraPersona"
                                        asp-route-idMenu="@menu.IdMenu"
                                        class="btn btn-outline-secondary w-100 mt-2">
+
                                         Solicitar para otra persona
                                     </a>
                                 }
                             </div>
                         </div>
-                    </div>
+                    </article>
                 </div>
             }
         </div>
     }
     else
     {
-        <div class="alert alert-info text-center">
-            No existen menús publicados para la fecha seleccionada.
+        <!-- Sin resultados -->
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="estado-vacio-simbolo"
+                     aria-hidden="true">
+                    —
+                </div>
+
+                <h2 class="h5">
+                    No hay menús disponibles
+                </h2>
+
+                <p class="text-muted mb-3">
+                    No existen menús publicados para la fecha
+                    @Model.FechaSeleccionada.ToString("dd/MM/yyyy").
+                </p>
+
+                <p class="text-muted small mb-0">
+                    Seleccione otra fecha para realizar una
+                    nueva consulta.
+                </p>
+            </div>
         </div>
     }
 </div>
 
+<!-- Modal de cancelación -->
 <div class="modal fade"
      id="modalCancelarSolicitud"
      tabindex="-1"
      aria-labelledby="tituloModalCancelarSolicitud"
      aria-hidden="true">
+
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
+
             <form asp-controller="Solicitud"
                   asp-action="Cancelar"
                   method="post">
+
                 @Html.AntiForgeryToken()
 
                 <input id="idSolicitudCancelar"
@@ -184,6 +309,7 @@
                 <div class="modal-header">
                     <h2 class="modal-title fs-5"
                         id="tituloModalCancelarSolicitud">
+
                         Cancelar solicitud
                     </h2>
 
@@ -200,13 +326,19 @@
                     </p>
 
                     <div class="alert alert-warning mb-0">
-                        <div>
-                            <strong>Tipo de comida:</strong>
+                        <div class="mb-2">
+                            <strong>
+                                Tipo de comida:
+                            </strong>
+
                             <span id="tipoComidaCancelar"></span>
                         </div>
 
                         <div>
-                            <strong>Menú:</strong>
+                            <strong>
+                                Menú:
+                            </strong>
+
                             <span id="descripcionMenuCancelar"></span>
                         </div>
                     </div>
@@ -232,18 +364,47 @@
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const modal = document.getElementById("modalCancelarSolicitud");
-            const campoIdSolicitud = document.getElementById("idSolicitudCancelar");
-            const campoTipoComida = document.getElementById("tipoComidaCancelar");
-            const campoDescripcion = document.getElementById("descripcionMenuCancelar");
+            const modal =
+                document.getElementById(
+                    "modalCancelarSolicitud");
 
-            modal.addEventListener("show.bs.modal", function (event) {
-                const boton = event.relatedTarget;
+            const campoIdSolicitud =
+                document.getElementById(
+                    "idSolicitudCancelar");
 
-                campoIdSolicitud.value = boton.dataset.idSolicitud;
-                campoTipoComida.textContent = boton.dataset.tipoComida;
-                campoDescripcion.textContent = boton.dataset.descripcion;
-            });
+            const campoTipoComida =
+                document.getElementById(
+                    "tipoComidaCancelar");
+
+            const campoDescripcion =
+                document.getElementById(
+                    "descripcionMenuCancelar");
+
+            if (!modal ||
+                !campoIdSolicitud ||
+                !campoTipoComida ||
+                !campoDescripcion) {
+                return;
+            }
+
+            modal.addEventListener(
+                "show.bs.modal",
+                function (event) {
+                    const boton = event.relatedTarget;
+
+                    if (!boton) {
+                        return;
+                    }
+
+                    campoIdSolicitud.value =
+                        boton.dataset.idSolicitud ?? "";
+
+                    campoTipoComida.textContent =
+                        boton.dataset.tipoComida ?? "";
+
+                    campoDescripcion.textContent =
+                        boton.dataset.descripcion ?? "";
+                });
         });
     </script>
 }

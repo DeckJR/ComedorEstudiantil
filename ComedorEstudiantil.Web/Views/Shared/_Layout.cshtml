@@ -1,218 +1,459 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@{
+    bool estaAutenticado =
+        User.Identity?.IsAuthenticated == true;
+
+    bool puedeGestionarMenus =
+        User.IsInRole("Cocina") ||
+        User.IsInRole("Direccion") ||
+        User.IsInRole("Director") ||
+        User.IsInRole("Administrador");
+
+    bool puedeRegistrarEntregas =
+        User.IsInRole("Cocina") ||
+        User.IsInRole("Direccion") ||
+        User.IsInRole("Director") ||
+        User.IsInRole("Administrador");
+
+    bool puedeGestionarHorarios =
+        User.IsInRole("Direccion") ||
+        User.IsInRole("Director") ||
+        User.IsInRole("Administrador");
+
+    bool puedeGestionarEstudiantes =
+        User.IsInRole("Auxiliar") ||
+        User.IsInRole("Orientador") ||
+        User.IsInRole("Direccion") ||
+        User.IsInRole("Director") ||
+        User.IsInRole("Administrador");
+
+    bool puedeGestionarUsuarios =
+        User.IsInRole("Direccion") ||
+        User.IsInRole("Director") ||
+        User.IsInRole("Administrador");
+
+    bool puedeVerReportes =
+        User.IsInRole("Direccion") ||
+        User.IsInRole("Director") ||
+        User.IsInRole("Administrador");
+
+    bool puedeVerBitacora =
+        User.IsInRole("Director") ||
+        User.IsInRole("Administrador");
+
+    bool puedeVerGestion =
+        puedeGestionarMenus ||
+        puedeGestionarHorarios ||
+        puedeGestionarEstudiantes ||
+        puedeGestionarUsuarios;
+
+    bool puedeVerInformes =
+        puedeVerReportes ||
+        puedeVerBitacora;
+}
+
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ComedorEstudiantil</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - Comedor - Colegio Gregorio José Ramírez Castro
+    </title>
+
     <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ComedorEstudiantil.styles.css" asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/ComedorEstudiantil.styles.css"
+          asp-append-version="true" />
 </head>
+
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-xl navbar-light bg-white border-bottom shadow-sm mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ComedorEstudiantil</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+
+                <!-- Identidad institucional -->
+                <a class="navbar-brand marca-enlace"
+                   asp-area=""
+                   asp-controller="Home"
+                   asp-action="Index">
+
+                    <img src="~/images/escudo-colegio.png"
+                         alt="Escudo del Colegio Gregorio José Ramírez Castro"
+                         class="logo-institucional" />
+
+                    <span class="marca-institucional">
+                        <span class="marca-titulo">
+                            Comedor
+                        </span>
+
+                        <span class="marca-colegio">
+                            Colegio Gregorio José Ramírez Castro
+                        </span>
+                    </span>
+                </a>
+
+                <!-- Botón para dispositivos pequeños -->
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#navegacionPrincipal"
+                        aria-controls="navegacionPrincipal"
+                        aria-expanded="false"
+                        aria-label="Mostrar u ocultar navegación">
+
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div id="navegacionPrincipal"
+                     class="collapse navbar-collapse">
+
+                    <!-- Navegación principal -->
+                    <ul class="navbar-nav navegacion-principal">
+
+                        <!-- Inicio -->
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark"
-                               asp-controller="Menu"
+                            <a class="nav-link"
+                               asp-area=""
+                               asp-controller="Home"
                                asp-action="Index">
-                                Menú
+                                Inicio
                             </a>
                         </li>
-                        @if (User.IsInRole("Cocina") ||
-                        User.IsInRole("Direccion") ||
-                        User.IsInRole("Director") ||
-                        User.IsInRole("Administrador"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Menu"
-                                   asp-action="Administrar">
-                                    Administrar menús
-                                </a>
-                            </li>
-                        }
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Solicitud"
-                                   asp-action="MisSolicitudes">
-                                    Mis solicitudes
-                                </a>
-                            </li>
-                        }
-                        @if (User.IsInRole("Cocina") ||
-                        User.IsInRole("Direccion") ||
-                        User.IsInRole("Director") ||
-                        User.IsInRole("Administrador"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Entrega"
-                                   asp-action="Registrar">
-                                    Registrar entrega
-                                </a>
-                            </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Entrega"
-                                   asp-action="Index">
-                                    Entregas del día
-                                </a>
-                            </li>
-                        }
-                        @if (User.IsInRole("Cocina") ||
-                        User.IsInRole("Direccion") ||
-                        User.IsInRole("Director") ||
-                        User.IsInRole("Administrador"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Actividad"
-                                   asp-action="Index">
-                                    Actividades
-                                </a>
-                            </li>
-                        }
+                        <!-- Menú -->
+                        <li class="nav-item dropdown">
+                            <a id="menuComedorDropdown"
+                               class="nav-link dropdown-toggle"
+                               href="#"
+                               role="button"
+                               data-bs-toggle="dropdown"
+                               aria-expanded="false">
+                                Menú
+                            </a>
 
-                        @if (User.IsInRole("Direccion") ||
-                        User.IsInRole("Director") ||
-                        User.IsInRole("Administrador"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="TipoComida"
-                                   asp-action="Index">
-                                    Horarios
-                                </a>
-                            </li>
-                        }
+                            <ul class="dropdown-menu"
+                                aria-labelledby="menuComedorDropdown">
 
-                        @if (User.IsInRole("Auxiliar") ||
-                        User.IsInRole("Orientador") ||
-                        User.IsInRole("Direccion") ||
-                        User.IsInRole("Director") ||
-                        User.IsInRole("Administrador"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Estudiante"
-                                   asp-action="Index">
-                                    Estudiantes
-                                </a>
-                            </li>
+                                <li>
+                                    <a class="dropdown-item"
+                                       asp-controller="Menu"
+                                       asp-action="Index">
+                                        Consultar menú
+                                    </a>
+                                </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="GradoSeccion"
-                                   asp-action="Index">
-                                    Secciones
+                                @if (estaAutenticado)
+                                {
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Solicitud"
+                                           asp-action="MisSolicitudes">
+                                            Mis solicitudes
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+
+                        <!-- Entregas -->
+                        @if (puedeRegistrarEntregas)
+                        {
+                            <li class="nav-item dropdown">
+                                <a id="entregasDropdown"
+                                   class="nav-link dropdown-toggle"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    Entregas
                                 </a>
+
+                                <ul class="dropdown-menu"
+                                    aria-labelledby="entregasDropdown">
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Entrega"
+                                           asp-action="Registrar">
+                                            Registrar entrega
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Entrega"
+                                           asp-action="Index">
+                                            Entregas del día
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         }
 
-                        @if (User.IsInRole("Direccion") ||
-                        User.IsInRole("Director") ||
-                        User.IsInRole("Administrador"))
+                        <!-- Gestión -->
+                        @if (puedeVerGestion)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Usuario"
-                                   asp-action="Index">
-                                    Usuarios
+                            <li class="nav-item dropdown">
+                                <a id="gestionDropdown"
+                                   class="nav-link dropdown-toggle"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    Gestión
                                 </a>
+
+                                <ul class="dropdown-menu"
+                                    aria-labelledby="gestionDropdown">
+
+                                    @if (puedeGestionarUsuarios ||
+                                   puedeGestionarEstudiantes)
+                                    {
+                                        <li>
+                                            <h6 class="dropdown-header">
+                                                Personas
+                                            </h6>
+                                        </li>
+                                    }
+
+                                    @if (puedeGestionarUsuarios)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Usuario"
+                                               asp-action="Index">
+                                                Usuarios
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @if (puedeGestionarEstudiantes)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Estudiante"
+                                               asp-action="Index">
+                                                Estudiantes
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="GradoSeccion"
+                                               asp-action="Index">
+                                                Secciones
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @if (puedeGestionarMenus ||
+                                   puedeGestionarHorarios)
+                                    {
+                                        @if (puedeGestionarUsuarios ||
+                                       puedeGestionarEstudiantes)
+                                        {
+                                            <li>
+                                                <hr class="dropdown-divider" />
+                                            </li>
+                                        }
+
+                                        <li>
+                                            <h6 class="dropdown-header">
+                                                Comedor
+                                            </h6>
+                                        </li>
+                                    }
+
+                                    @if (puedeGestionarMenus)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Menu"
+                                               asp-action="Administrar">
+                                                Administrar menús
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Actividad"
+                                               asp-action="Index">
+                                                Actividades
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @if (puedeGestionarHorarios)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="TipoComida"
+                                               asp-action="Index">
+                                                Horarios
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
                             </li>
                         }
-                        @if (User.Identity?.IsAuthenticated == true)
+
+                        <!-- Informes -->
+                        @if (puedeVerInformes)
                         {
-                            <li class="nav-item">
-                                <span class="nav-link text-dark">
-                                    @User.Identity.Name
-                                </span>
+                            <li class="nav-item dropdown">
+                                <a id="informesDropdown"
+                                   class="nav-link dropdown-toggle"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    Informes
+                                </a>
+
+                                <ul class="dropdown-menu"
+                                    aria-labelledby="informesDropdown">
+
+                                    @if (puedeVerReportes)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Reporte"
+                                               asp-action="Index">
+                                                Reportes
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @if (puedeVerBitacora)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Bitacora"
+                                               asp-action="Index">
+                                                Bitácora
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
                             </li>
+                        }
+                    </ul>
 
-                            <li class="nav-item">
-                                <form asp-controller="Cuenta"
-                                      asp-action="CerrarSesion"
-                                      method="post"
-                                      class="d-inline">
-                                    @Html.AntiForgeryToken()
+                    <!-- Cuenta alineada a la derecha -->
+                    <ul class="navbar-nav ms-auto navegacion-cuenta">
+                        @if (estaAutenticado)
+                        {
+                            <li class="nav-item dropdown">
+                                <a id="cuentaDropdown"
+                                   class="nav-link dropdown-toggle"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    @User.Identity!.Name
+                                </a>
 
-                                    <button type="submit"
-                                            class="nav-link btn btn-link text-dark">
-                                        Cerrar sesión
-                                    </button>
-                                </form>
+                                <ul class="dropdown-menu dropdown-menu-end"
+                                    aria-labelledby="cuentaDropdown">
+
+                                    <li>
+                                        <h6 class="dropdown-header">
+                                            Cuenta
+                                        </h6>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Cuenta"
+                                           asp-action="CambiarContrasena">
+                                            Cambiar contraseña
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+
+                                    <li>
+                                        <form asp-controller="Cuenta"
+                                              asp-action="CerrarSesion"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="dropdown-item">
+                                                Cerrar sesión
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
+                                <a class="nav-link"
                                    asp-controller="Cuenta"
                                    asp-action="IniciarSesion">
                                     Iniciar sesión
                                 </a>
                             </li>
                         }
-                        @if (User.IsInRole("Direccion") ||
-                        User.IsInRole("Director") ||
-                        User.IsInRole("Administrador"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Reporte"
-                                   asp-action="Index">
-                                    Reportes
-                                </a>
-                            </li>
-                        }
-                        @if (User.IsInRole("Director") ||
-                        User.IsInRole("Administrador"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Bitacora"
-                                   asp-action="Index">
-                                    Bitácora
-                                </a>
-                            </li>
-                        }
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main"
+              class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - ComedorEstudiantil - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="footer-institucional border-top">
+        <div class="container footer-contenido">
+            <span>
+                &copy; 2026 Colegio Gregorio José Ramírez Castro
+                · Sistema del Comedor
+            </span>
+
+            <span class="separador-footer"
+                  aria-hidden="true">
+                ·
+            </span>
+
+            <a asp-area=""
+               asp-controller="Home"
+               asp-action="Privacy">
+                Privacidad y uso de datos
+            </a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+
+    <script src="~/js/site.js"
+            asp-append-version="true">
+    </script>
+
+    @await RenderSectionAsync(
+            "Scripts",
+            required: false)
 </body>
 </html>

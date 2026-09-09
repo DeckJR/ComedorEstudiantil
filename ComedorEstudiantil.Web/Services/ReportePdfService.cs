@@ -7,6 +7,12 @@ namespace ComedorEstudiantil.Web.Services
 {
     public class ReportePdfService : IReportePdfService
     {
+        private const string NombreColegio =
+            "Colegio Gregorio José Ramírez Castro";
+
+        private const string NombreSistema =
+            "Sistema del Comedor";
+
         public byte[] GenerarSolicitudes(
             ReporteGeneralDTO reporte)
         {
@@ -287,28 +293,42 @@ namespace ComedorEstudiantil.Web.Services
                 .BorderColor(Colors.Grey.Medium)
                 .Column(column =>
                 {
+                    column.Spacing(2);
+
                     column.Item()
-                        .Text("Comedor Estudiantil")
+                        .Text(NombreColegio)
                         .FontSize(16)
                         .Bold();
 
                     column.Item()
+                        .Text(NombreSistema)
+                        .FontSize(10)
+                        .FontColor(Colors.Grey.Darken1)
+                        .SemiBold();
+
+                    column.Item()
+                        .PaddingTop(2)
                         .Text(titulo)
                         .FontSize(13)
                         .SemiBold();
 
                     column.Item().Text(
-                        $"Periodo: {reporte.Filtro.FechaInicio:dd/MM/yyyy} al {reporte.Filtro.FechaFin:dd/MM/yyyy}");
+                        $"Periodo: " +
+                        $"{reporte.Filtro.FechaInicio:dd/MM/yyyy} " +
+                        $"al " +
+                        $"{reporte.Filtro.FechaFin:dd/MM/yyyy}");
 
                     if (!string.IsNullOrWhiteSpace(
                         reporte.Filtro.TipoComida))
                     {
                         column.Item().Text(
-                            $"Tipo de comida: {reporte.Filtro.TipoComida}");
+                            $"Tipo de comida: " +
+                            $"{reporte.Filtro.TipoComida}");
                     }
 
                     column.Item().Text(
-                        $"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}");
+                        $"Generado: " +
+                        $"{DateTime.Now:dd/MM/yyyy HH:mm}");
                 });
         }
 
@@ -322,19 +342,24 @@ namespace ComedorEstudiantil.Web.Services
                 .Row(row =>
                 {
                     row.RelativeItem().Text(
-                        $"Solicitudes: {reporte.TotalSolicitudes}");
+                        $"Solicitudes: " +
+                        $"{reporte.TotalSolicitudes}");
 
                     row.RelativeItem().Text(
-                        $"Activas: {reporte.TotalActivas}");
+                        $"Activas: " +
+                        $"{reporte.TotalActivas}");
 
                     row.RelativeItem().Text(
-                        $"Canceladas: {reporte.TotalCanceladas}");
+                        $"Canceladas: " +
+                        $"{reporte.TotalCanceladas}");
 
                     row.RelativeItem().Text(
-                        $"Entregadas: {reporte.TotalEntregadas}");
+                        $"Entregadas: " +
+                        $"{reporte.TotalEntregadas}");
 
                     row.RelativeItem().Text(
-                        $"Pendientes: {reporte.TotalPendientes}");
+                        $"Pendientes: " +
+                        $"{reporte.TotalPendientes}");
                 });
         }
 
@@ -348,15 +373,18 @@ namespace ComedorEstudiantil.Web.Services
                 .Row(row =>
                 {
                     row.RelativeItem().Text(
-                        $"Entregas iniciales: {reporte.TotalEntregasIniciales}")
+                        $"Entregas iniciales: " +
+                        $"{reporte.TotalEntregasIniciales}")
                         .SemiBold();
 
                     row.RelativeItem().Text(
-                        $"Repeticiones: {reporte.TotalRepeticiones}")
+                        $"Repeticiones: " +
+                        $"{reporte.TotalRepeticiones}")
                         .SemiBold();
 
                     row.RelativeItem().Text(
-                        $"Total de platos: {reporte.TotalPlatosServidos}")
+                        $"Total de platos: " +
+                        $"{reporte.TotalPlatosServidos}")
                         .SemiBold();
                 });
         }
@@ -390,13 +418,25 @@ namespace ComedorEstudiantil.Web.Services
             IContainer container)
         {
             container
-                .AlignCenter()
-                .Text(text =>
+                .Row(row =>
                 {
-                    text.Span("Página ");
-                    text.CurrentPageNumber();
-                    text.Span(" de ");
-                    text.TotalPages();
+                    row.RelativeItem()
+                        .AlignLeft()
+                        .Text(
+                            $"{NombreColegio} · " +
+                            $"{NombreSistema}")
+                        .FontSize(7)
+                        .FontColor(Colors.Grey.Darken1);
+
+                    row.RelativeItem()
+                        .AlignRight()
+                        .Text(text =>
+                        {
+                            text.Span("Página ");
+                            text.CurrentPageNumber();
+                            text.Span(" de ");
+                            text.TotalPages();
+                        });
                 });
         }
     }
