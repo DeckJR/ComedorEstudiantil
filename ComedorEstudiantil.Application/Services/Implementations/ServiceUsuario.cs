@@ -55,10 +55,12 @@ namespace ComedorEstudiantil.Application.Services.Implementations
         }
 
         public async Task<List<UsuarioListaDTO>>
-            ListarAsync()
+    ListarAsync(
+        bool incluirArchivados = false)
         {
             List<Usuario> usuarios =
-                await _repositoryUsuario.ListarAsync();
+                await _repositoryUsuario.ListarAsync(
+                    incluirArchivados);
 
             return usuarios
                 .Select(usuario =>
@@ -80,9 +82,7 @@ namespace ComedorEstudiantil.Application.Services.Implementations
                             usuario.Correo,
 
                         Rol =
-                            usuario
-                                .IdRolNavigation
-                                .Nombre,
+                            usuario.IdRolNavigation.Nombre,
 
                         Activo =
                             usuario.Activo == true,
@@ -405,7 +405,7 @@ namespace ComedorEstudiantil.Application.Services.Implementations
             if (idUsuario == idUsuarioActual)
             {
                 return ResultadoOperacionDTO.Error(
-                    "No puede desactivar su propio usuario.");
+                    "No puede archivar su propio usuario.");
             }
 
             Usuario? usuario =
@@ -444,8 +444,8 @@ namespace ComedorEstudiantil.Application.Services.Implementations
 
             string mensaje =
                 nuevoEstado
-                    ? "El usuario fue activado correctamente."
-                    : "El usuario fue desactivado correctamente.";
+                    ? "El usuario fue restaurado  correctamente."
+                    : "El usuario fue archivado correctamente.";
 
             return ResultadoOperacionDTO.Correcto(
                 mensaje);

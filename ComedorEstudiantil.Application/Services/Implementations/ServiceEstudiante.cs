@@ -52,10 +52,12 @@ namespace ComedorEstudiantil.Application.Services.Implementations
         }
 
         public async Task<List<EstudianteListaDTO>>
-            ListarAsync()
+    ListarAsync(
+        bool incluirArchivados = false)
         {
             List<Estudiante> estudiantes =
-                await _repositoryEstudiante.ListarAsync();
+                await _repositoryEstudiante.ListarAsync(
+                    incluirArchivados);
 
             return estudiantes
                 .Select(estudiante =>

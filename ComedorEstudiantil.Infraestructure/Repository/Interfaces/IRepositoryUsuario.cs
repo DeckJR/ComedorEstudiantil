@@ -9,7 +9,8 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Interfaces
 {
     public interface IRepositoryUsuario
     {
-        Task<List<Usuario>> ListarAsync();
+        Task<List<Usuario>> ListarAsync(
+    bool incluirArchivados = false);
         Task<Usuario?> BuscarPorIdentificacionAsync(string identificacion);
         Task<Usuario?> BuscarPorCodigoBarrasAsync(string codigoBarras);
         Task<Usuario?> BuscarPorIdAsync(int idUsuario);

@@ -2,21 +2,24 @@
 
 @{
     ViewData["Title"] = "Estudiantes";
+
+    bool incluirArchivados =
+        ViewData["IncluirArchivados"] is bool valor &&
+        valor;
 }
 
 <div class="container py-4">
     <div class="d-flex flex-wrap
                 justify-content-between
                 align-items-center
-                gap-2 mb-4">
+                gap-3 mb-4">
         <div>
             <h1 class="h3 mb-1">
                 Estudiantes
             </h1>
 
             <p class="text-muted mb-0">
-                Administración de estudiantes
-                del comedor.
+                Administración de estudiantes del comedor.
             </p>
         </div>
 
@@ -29,19 +32,88 @@
 
     @if (TempData["MensajeExito"] is not null)
     {
-        <div class="alert alert-success">
+        <div class="alert alert-success
+                    alert-dismissible fade show"
+             role="alert">
             @TempData["MensajeExito"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar">
+            </button>
         </div>
     }
 
     @if (TempData["MensajeError"] is not null)
     {
-        <div class="alert alert-danger">
+        <div class="alert alert-danger
+                    alert-dismissible fade show"
+             role="alert">
             @TempData["MensajeError"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar">
+            </button>
         </div>
     }
 
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-controller="Estudiante"
+                  asp-action="Index"
+                  method="get">
+                <div class="form-check form-switch">
+                    @if (incluirArchivados)
+                    {
+                        <input id="incluirArchivados"
+                               name="incluirArchivados"
+                               value="true"
+                               type="checkbox"
+                               class="form-check-input"
+                               checked
+                               onchange="this.form.submit();" />
+                    }
+                    else
+                    {
+                        <input id="incluirArchivados"
+                               name="incluirArchivados"
+                               value="true"
+                               type="checkbox"
+                               class="form-check-input"
+                               onchange="this.form.submit();" />
+                    }
+
+                    <label for="incluirArchivados"
+                           class="form-check-label">
+                        Mostrar también estudiantes archivados
+                    </label>
+                </div>
+
+                <div class="form-text">
+                    Los estudiantes archivados dejan de aparecer
+                    en el listado principal y no pueden utilizar
+                    su cuenta.
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
+        <div class="card-header d-flex
+                    justify-content-between
+                    align-items-center">
+            <strong>
+                Estudiantes registrados
+            </strong>
+
+            <span class="badge bg-secondary">
+                @Model.Count()
+            </span>
+        </div>
+
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-striped
@@ -64,7 +136,9 @@
                     <tbody>
                         @foreach (var estudiante in Model)
                         {
-                            <tr>
+                            <tr class="@(!estudiante.Activo
+                                ? "table-secondary"
+                                : string.Empty)">
                                 <td>
                                     @estudiante.Identificacion
                                 </td>
@@ -99,7 +173,7 @@
                                     else
                                     {
                                         <span class="badge bg-secondary">
-                                            Inactivo
+                                            Archivado
                                         </span>
                                     }
                                 </td>
@@ -129,83 +203,14 @@
                                                     ? "btn-outline-danger"
                                                     : "btn-outline-success")"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#estado-@estudiante.IdEstudiante">
+                                                data-bs-target="#modalEstadoEstudiante"
+                                                data-id="@estudiante.IdEstudiante"
+                                                data-nombre="@estudiante.NombreCompleto"
+                                                data-activo="@estudiante.Activo.ToString().ToLowerInvariant()">
                                             @(estudiante.Activo
-                                                ? "Desactivar"
-                                                : "Activar")
+                                                ? "Archivar"
+                                                : "Restaurar")
                                         </button>
-                                    </div>
-
-                                    <div class="modal fade"
-                                         id="estado-@estudiante.IdEstudiante"
-                                         tabindex="-1"
-                                         aria-hidden="true">
-                                        <div class="modal-dialog
-                                                    modal-dialog-centered">
-                                            <div class="modal-content
-                                                        text-start">
-                                                <div class="modal-header">
-                                                    <h2 class="modal-title fs-5">
-                                                        @(estudiante.Activo
-                                                            ? "Desactivar estudiante"
-                                                            : "Activar estudiante")
-                                                    </h2>
-
-                                                    <button type="button"
-                                                            class="btn-close"
-                                                            data-bs-dismiss="modal"
-                                                            aria-label="Cerrar">
-                                                    </button>
-                                                </div>
-
-                                                <div class="modal-body">
-                                                    @if (estudiante.Activo)
-                                                    {
-                                                        <p class="mb-0">
-                                                            ¿Desea desactivar a
-                                                            <strong>
-                                                                @estudiante.NombreCompleto
-                                                            </strong>?
-                                                        </p>
-                                                    }
-                                                    else
-                                                    {
-                                                        <p class="mb-0">
-                                                            ¿Desea activar a
-                                                            <strong>
-                                                                @estudiante.NombreCompleto
-                                                            </strong>?
-                                                        </p>
-                                                    }
-                                                </div>
-
-                                                <div class="modal-footer">
-                                                    <button type="button"
-                                                            class="btn
-                                                                   btn-secondary"
-                                                            data-bs-dismiss="modal">
-                                                        Volver
-                                                    </button>
-
-                                                    <form asp-controller="Estudiante"
-                                                          asp-action="CambiarEstado"
-                                                          method="post">
-                                                        @Html.AntiForgeryToken()
-
-                                                        <input name="id"
-                                                               value="@estudiante.IdEstudiante"
-                                                               type="hidden" />
-
-                                                        <button type="submit"
-                                                                class="btn @(estudiante.Activo
-                                                                    ? "btn-danger"
-                                                                    : "btn-success")">
-                                                            Confirmar
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -217,8 +222,18 @@
                                 <td colspan="8"
                                     class="text-center
                                            text-muted py-4">
-                                    No existen estudiantes
-                                    registrados.
+                                    @if (incluirArchivados)
+                                    {
+                                        <span>
+                                            No existen estudiantes registrados.
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            No existen estudiantes activos.
+                                        </span>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -228,3 +243,128 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade"
+     id="modalEstadoEstudiante"
+     tabindex="-1"
+     aria-labelledby="tituloModalEstadoEstudiante"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-controller="Estudiante"
+                  asp-action="CambiarEstado"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <input id="idEstudianteEstado"
+                       name="id"
+                       type="hidden" />
+
+                <input name="incluirArchivados"
+                       value="@incluirArchivados.ToString().ToLowerInvariant()"
+                       type="hidden" />
+
+                />
+
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5"
+                        id="tituloModalEstadoEstudiante">
+                    </h2>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p id="mensajeModalEstadoEstudiante"
+                       class="mb-0">
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Volver
+                    </button>
+
+                    <button id="botonConfirmarEstadoEstudiante"
+                            type="submit"
+                            class="btn">
+                        Confirmar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal =
+                document.getElementById(
+                    "modalEstadoEstudiante");
+
+            const campoId =
+                document.getElementById(
+                    "idEstudianteEstado");
+
+            const titulo =
+                document.getElementById(
+                    "tituloModalEstadoEstudiante");
+
+            const mensaje =
+                document.getElementById(
+                    "mensajeModalEstadoEstudiante");
+
+            const botonConfirmar =
+                document.getElementById(
+                    "botonConfirmarEstadoEstudiante");
+
+            modal.addEventListener(
+                "show.bs.modal",
+                function (event) {
+                    const boton = event.relatedTarget;
+                    const activo =
+                        boton.dataset.activo === "true";
+
+                    campoId.value =
+                        boton.dataset.id;
+
+                    if (activo) {
+                        titulo.textContent =
+                            "Archivar estudiante";
+
+                        mensaje.textContent =
+                            "¿Desea archivar a " +
+                            boton.dataset.nombre +
+                            "? El estudiante dejará de aparecer en el listado principal y no podrá utilizar su cuenta.";
+
+                        botonConfirmar.textContent =
+                            "Archivar";
+
+                        botonConfirmar.className =
+                            "btn btn-danger";
+                    } else {
+                        titulo.textContent =
+                            "Restaurar estudiante";
+
+                        mensaje.textContent =
+                            "¿Desea restaurar a " +
+                            boton.dataset.nombre +
+                            "? El estudiante podrá volver a utilizar su cuenta.";
+
+                        botonConfirmar.textContent =
+                            "Restaurar";
+
+                        botonConfirmar.className =
+                            "btn btn-success";
+                    }
+                });
+        });
+    </script>
+}

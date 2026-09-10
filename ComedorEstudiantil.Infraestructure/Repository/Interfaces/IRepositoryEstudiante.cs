@@ -4,7 +4,8 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Interfaces
 {
     public interface IRepositoryEstudiante
     {
-        Task<List<Estudiante>> ListarAsync();
+        Task<List<Estudiante>> ListarAsync(
+    bool incluirArchivados = false);
 
         Task<Estudiante?> BuscarPorIdAsync(
             int idEstudiante);

@@ -4,7 +4,8 @@ namespace ComedorEstudiantil.Application.Services.Interfaces
 {
     public interface IServiceEstudiante
     {
-        Task<List<EstudianteListaDTO>> ListarAsync();
+        Task<List<EstudianteListaDTO>> ListarAsync(
+    bool incluirArchivados = false);
 
         Task<EstudianteFormularioDTO>
             PrepararNuevoAsync();

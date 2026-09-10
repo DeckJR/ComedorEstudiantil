@@ -9,7 +9,8 @@ namespace ComedorEstudiantil.Application.Services.Interfaces
 {
     public interface IServiceUsuario
     {
-        Task<List<UsuarioListaDTO>> ListarAsync();
+        Task<List<UsuarioListaDTO>> ListarAsync(
+    bool incluirArchivados = false);
 
         Task<CodigoBarrasUsuarioDTO?> ObtenerCodigoBarrasAsync(
             int idUsuario);

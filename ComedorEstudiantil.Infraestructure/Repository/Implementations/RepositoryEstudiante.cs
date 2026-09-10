@@ -17,19 +17,29 @@ namespace ComedorEstudiantil.Infraestructure.Repository.Implementations
             _context = context;
         }
 
-        public async Task<List<Estudiante>>
-            ListarAsync()
+        public async Task<List<Estudiante>> ListarAsync(
+    bool incluirArchivados = false)
         {
-            return await _context.Set<Estudiante>()
-                .AsNoTracking()
-                .Include(estudiante =>
-                    estudiante.IdUsuarioNavigation)
-                .Include(estudiante =>
-                    estudiante
-                        .IdTipoBeneficiarioNavigation)
-                .Include(estudiante =>
-                    estudiante
-                        .IdGradoSeccionNavigation)
+            IQueryable<Estudiante> consulta =
+                _context.Set<Estudiante>()
+                    .AsNoTracking()
+                    .Include(estudiante =>
+                        estudiante.IdUsuarioNavigation)
+                    .Include(estudiante =>
+                        estudiante
+                            .IdTipoBeneficiarioNavigation)
+                    .Include(estudiante =>
+                        estudiante
+                            .IdGradoSeccionNavigation);
+
+            if (!incluirArchivados)
+            {
+                consulta = consulta.Where(estudiante =>
+                    estudiante.Activo == true &&
+                    estudiante.IdUsuarioNavigation.Activo == true);
+            }
+
+            return await consulta
                 .OrderBy(estudiante =>
                     estudiante
                         .IdUsuarioNavigation

@@ -37,10 +37,15 @@ namespace ComedorEstudiantil.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+    bool incluirArchivados = false)
         {
             List<EstudianteListaDTO> estudiantes =
-                await _serviceEstudiante.ListarAsync();
+                await _serviceEstudiante.ListarAsync(
+                    incluirArchivados);
+
+            ViewData["IncluirArchivados"] =
+                incluirArchivados;
 
             return View(estudiantes);
         }
@@ -150,18 +155,18 @@ namespace ComedorEstudiantil.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CambiarEstado(
-            int id)
+    int id,
+    bool incluirArchivados = false)
         {
             ResultadoOperacionDTO resultado =
-                await _serviceEstudiante
-                    .CambiarEstadoAsync(
-                        id,
-                        ObtenerIdUsuarioActual());
+                await _serviceEstudiante.CambiarEstadoAsync(
+                    id,
+                    ObtenerIdUsuarioActual());
 
             if (resultado.Exitoso)
             {
                 _logger.LogInformation(
-                    "El usuario {IdUsuarioActual} cambió el estado del estudiante {IdEstudiante}.",
+                    "El usuario {IdUsuarioActual} archivó o restauró al estudiante {IdEstudiante}.",
                     ObtenerIdUsuarioActual(),
                     id);
 
@@ -174,7 +179,12 @@ namespace ComedorEstudiantil.Web.Controllers
                     resultado.Mensaje;
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(
+                nameof(Index),
+                new
+                {
+                    incluirArchivados
+                });
         }
 
         [HttpGet]
